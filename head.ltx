@@ -1,0 +1,27 @@
+\documentclass{article}
+\usepackage{makeidx}
+\usepackage[hidelinks]{hyperref}
+\makeindex
+\begin{document}
+\title{Crossrefware documentation}
+\author{Boris Veytsman}
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+Crossrefware is a collection of Perl scripts used to help to submit
+the documents to \url{http://www.crossref.org}.  
+
+To use scrips you need a number of standard Perl libraries:
+\begin{enumerate}
+\item \path{Text::BibTeX} by Greg Ward,
+\item \path{TeX::Encode} by Timothy D Brody
+\end{enumerate}
+They are included in most standard Perl distributions, or can be
+installed from \url{http://www.cpan.org}.
+
+
+I am grateful to Josko Plazonic from Princeton Math Dept whose
+(unpublished) Python script was an inspiration for this suite.
+
