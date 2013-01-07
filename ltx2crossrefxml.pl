@@ -73,6 +73,8 @@ extent permitted by law.
  use Text::BibTeX::Name;
  use TeX::Encode;
  use Encode;
+ use HTML::Entities;
+ use XML::Entities;
  use File::Basename;
  use File::Spec;
  my $USAGE="USAGE: $0 [-c config] [-o output] file1 file2 ...\n";
@@ -101,7 +103,6 @@ extent permitted by law.
  our $batchId="ltx2crossref$$";
  our $timestamp=strftime("%Y%m%d%H%M%S", gmtime);
 
- our $url='http://secure.pdcnet.org/resphilosophica/Res-Philosophica';
 
  if ($opts{c}) {
      if (-r $opts{c}) {
@@ -221,21 +222,27 @@ sub AddBibliography {
     my $insidebibliography = 0;
     my $currpaper="";
     my @result;
+    my $key;
     while (<BIB>) {
 	chomp;
-	if (/^\s*\\bibitem/) {
+	if (/^\s*\\bibitem(?:\[.*\])?+\{(.+)\}/) {
 	    if ($insidebibliography) {
 		if ($currpaper) {
-		    push @result, $currpaper;
+		    my %paperhash;
+		    $paperhash{$key}=$currpaper;
+		    push @result, \%paperhash;
 		}
 	    }
+	    $key = $1;
 	    $currpaper="";
 	    $insidebibliography=1;
 	    next;
 	}
 	if (/^\s*\\end\{thebibliography\}/) {
 	    if ($currpaper) {
-		push @result, $currpaper;
+		    my %paperhash;
+		    $paperhash{$key}=$currpaper;
+		    push @result, \%paperhash;
 	    }
 	    $currpaper="";
 	    $insidebibliography=0;
@@ -274,6 +281,7 @@ END
 sub PrintPaper {
     my $paper = shift;
     my $title=SanitizeText($paper->{title});
+    my $url=GetURL($paper->{doi});
     print OUT <<END;
       <journal_article publication_type="full_text">
         <titles>
@@ -313,8 +321,16 @@ END
         </doi_data>
 END
 
-foreach my $citation (@{$paper->{bibliography}}) {
-    PrintCitation($citation);
+if (scalar(@{$paper->{bibliography}})) {
+    print OUT <<END;
+        <citation_list>
+END
+    foreach my $citation (@{$paper->{bibliography}}) {
+	PrintCitation($citation);
+    }
+    print OUT <<END;
+        </citation_list>
+END
 }
 
     print OUT <<END;
@@ -330,12 +346,25 @@ END
 ###############################################################
 sub SanitizeText {
     my $string = shift;
+    # There is a bug in the decode function, which we need to work 
+    # around:  it adds space to constructions like \o x
+    $string =~ s/(\\[a-zA-Z])\s+/$1/g;
     $string =~ s/\\newblock//g;
     $string =~ s/\\urlprefix//g;
-#    $string = decode('latex', $string);
-#    $string =~ s/\\[a-zA-Z]+/ /g;
-#    $string =~ s/\\\\/ /g;
-#    $string =~ s/[\[\{\}\]]/ /g;
+    $string =~ s/\\emph//g;
+    $string =~ s/\\enquote//g;
+    $string =~ s/\\url/URL: /g;
+    $string =~ s/\\doi/DOI: /g;
+    $string =~ s/\\\\/ /g;
+    $string = decode('latex', $string);
+    $string =~ s/\\[a-zA-Z]+/ /g;
+    $string =~ s/\\\\/ /g;
+    $string =~ s/[\[\{\}\]]/ /g;
+    $string = encode_entities($string);
+    $string = XML::Entities::numify('all', $string);
+    $string =~ s/amp;//g;
+    $string =~ s/~/ /g;
+    $string =~ s/\s*([\.;,])/$1/g;
     return $string;
 }
 
@@ -379,15 +408,30 @@ END
 #  Printing citations
 #############################################################
 sub PrintCitation {
-    my $citation=shift;
-    $citation=SanitizeText($citation);
+    my $paperhash=shift;
+    foreach my $key (keys (%{$paperhash})) {
+	my $citation=$paperhash->{$key};
+	$citation=SanitizeText($citation);
 
-    print OUT <<END;
-        <citation key="aaaa">
-          <unstructured_citation>
-            $citation
-          </unstructured_citation>
-        </citation>
+	print OUT <<END;
+          <citation key="$key">
+             <unstructured_citation>
+               $citation
+             </unstructured_citation>
+          </citation>
 END
+}
 
+}
+
+##############################################################
+#  Calculating URL
+##############################################################
+
+sub GetURL {
+    my $doi = shift;
+    
+    my $result= 'http://www.pdcnet.org/oom/serviceurl_ver=Z39.88-2004&rft_val_fmt=&rft.imuse_synonym=resphilosophica&rft.doi='.$doi.'&svc_id=info:www.pdcnet.org/collection';
+    $result =~ s/&/&#38;/g;
+    return $result;
 }
