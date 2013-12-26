@@ -59,3 +59,29 @@ L<http://www.gnu.org/licenses/gpl.html>.  There is NO WARRANTY, to the
 extent permitted by law.
 
 =cut
+
+ use strict;
+
+ my $USAGE="USAGE: $0 [-c config] [-o output] file ...\n";
+ use Getopt::Std;
+ my %opts;
+ getopts('c:o:',\%opts) or die $USAGE;
+
+ ################################################################
+ # Defaults and parameters
+ ################################################################
+
+ *OUT=*STDOUT;
+ 
+ if (defined($opts{o})) {
+     open (OUT, ">$opts{o}") or die "Cannot open file $opts{o} for writing\n";
+ }
+
+ if ($opts{c}) {
+     if (-r $opts{c}) {
+	 require $opts{c};
+     } else {
+	 die "Cannot read options $opts{c}.  $USAGE";
+     }
+ }
+
