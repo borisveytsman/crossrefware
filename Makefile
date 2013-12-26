@@ -1,5 +1,6 @@
 SCRIPTS = \
-	ltx2crossrefxml.pl
+	ltx2crossrefxml.pl \
+	bibdoiadd.pl
 
 MAN1 = ${SCRIPTS:%.pl=%.1}
 
@@ -28,6 +29,7 @@ distclean: clean
 	makeindex $*
 	pdflatex $*
 
+crossrefware.tex:  head.ltx
 
-crossrefware.tex: ${SCRIPTS} head.ltx
-	pod2latex -modify -full -prefile head.ltx -out $@ $<
+crossrefware.tex: ${SCRIPTS} 
+	pod2latex -modify -full -prefile head.ltx -out $@ $+
