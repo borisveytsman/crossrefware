@@ -115,6 +115,7 @@ our $password;
 
 if ($opts{c}) {
     if (-r $opts{c}) {
+	push @INC, ".";
 	require $opts{c};
     } else {
 	die "Cannot read options $opts{c}.  $USAGE";
