@@ -93,13 +93,13 @@ extent permitted by law.
  }
 
 
- our $depositorName='Jonathan Jacobs';
- our $depositorEmail='editor@resphilosophica.org';
- our $registrant='Res Philosophica';
- our $fullTitle = "Res Philosophica";
- our $abbrevTitle = "Res Phil.";
- our $issn = "2168-9105";
- our $coden = "rphil";
+ our $depositorName='DEPOSITOR_NAME';
+ our $depositorEmail='DEOPSITOR_EMAIL';
+ our $registrant='REGISTRANT';
+ our $fullTitle = "FULL TITLE";
+ our $abbrevTitle = "ABBR. Title.";
+ our $issn = "1234-5678";
+ our $coden = "CODEN";
  our $batchId="ltx2crossref$$";
  our $timestamp=strftime("%Y%m%d%H%M%S", gmtime);
 
@@ -350,12 +350,17 @@ sub SanitizeText {
     # around:  it adds space to constructions like \o x
     $string =~ s/(\\[a-zA-Z])\s+/$1/g;
     $string =~ s/\\newblock//g;
+    $string =~ s/\\bgroup//g;
+    $string =~ s/\\egroup//g;
+    $string =~ s/\\scshape//g;
     $string =~ s/\\urlprefix//g;
     $string =~ s/\\emph//g;
+    $string =~ s/\\textbf//g;
     $string =~ s/\\enquote//g;
     $string =~ s/\\url/URL: /g;
     $string =~ s/\\doi/DOI: /g;
     $string =~ s/\\\\/ /g;
+    $string =~ s/\$//g;
     $string = decode('latex', $string);
     $string =~ s/\\[a-zA-Z]+/ /g;
     $string =~ s/\\\\/ /g;
