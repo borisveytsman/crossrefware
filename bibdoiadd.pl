@@ -82,6 +82,7 @@ extent permitted by law.
 
 use strict;
 use Text::BibTeX;
+use Text::BibTeX::Name;
 use Getopt::Std;
 use URI::Escape;
 use LWP::Simple;
