@@ -281,7 +281,7 @@ END
 sub PrintPaper {
     my $paper = shift;
     my $title=SanitizeText($paper->{title});
-    my $url=GetURL($paper->{doi});
+    my $url=GetURL($paper);
     print OUT <<END;
       <journal_article publication_type="full_text">
         <titles>
@@ -434,9 +434,15 @@ END
 ##############################################################
 
 sub GetURL {
-    my $doi = shift;
-    
-    my $result= 'http://www.pdcnet.org/oom/service?url_ver=Z39.88-2004&rft_val_fmt=&rft.imuse_synonym=resphilosophica&rft.DOI='.$doi.'&svc_id=info:www.pdcnet.org/collection';
+    my $paper = shift;
+
+    my $result;
+    if ($paper->{paperUrl}) {
+	$result= $paper->{paperUrl}
+    } else {
+	my $doi=$paper->{doi};
+	$result= 'http://www.pdcnet.org/oom/service?url_ver=Z39.88-2004&rft_val_fmt=&rft.imuse_synonym=resphilosophica&rft.DOI='.$doi.'&svc_id=info:www.pdcnet.org/collection';
+    }
     $result =~ s/&/&#38;/g;
     return $result;
 }
