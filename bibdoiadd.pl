@@ -4,7 +4,7 @@
 
 =head1 NAME
 
-bibdoiadd.pl - add a DOI number to papers in a given bib file
+bibdoiadd.pl - add DOI numbers to papers in a given bib file
 
 =head1 SYNOPSIS
 
@@ -22,7 +22,8 @@ See below for its format.
 
 =item B<-o> I<output>
 
-Output file.  If this option is not used, the result is output to stdout.
+Output file.  If this option is not used, the name for the 
+output file is formed by adding C<_doi> to the input file
 
 =back
 
