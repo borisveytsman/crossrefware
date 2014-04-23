@@ -94,7 +94,7 @@ extent permitted by law.
 
 
  our $depositorName='DEPOSITOR_NAME';
- our $depositorEmail='DEOPSITOR_EMAIL';
+ our $depositorEmail='DEPOSITOR_EMAIL';
  our $registrant='REGISTRANT';
  our $fullTitle = "FULL TITLE";
  our $abbrevTitle = "ABBR. Title.";
@@ -197,7 +197,7 @@ sub AddPaper {
     my %data;
     while (<RPI>) {
 	chomp;
-        if (/^%(.*)=\s*(.*)\s*$/) {
+        if (/^%([^=]*)\s*=\s*(.*)\s*$/) {
            $data{$1}=$2;
         }
     }
