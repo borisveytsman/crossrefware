@@ -4,8 +4,7 @@
 
 =head1 NAME
 
-ltx2crossrefxml.pl - a tool for creation of XML files for submitting
-to crossref.
+ltx2crossrefxml.pl - a tool for creation of XML files for submitting to crossref.
 
 =head1 SYNOPSIS
 
@@ -78,9 +77,22 @@ extent permitted by law.
  use File::Basename;
  use File::Spec;
  my $USAGE="USAGE: $0 [-c config] [-o output] file1 file2 ...\n";
+my $VERSION = <<END;
+ltx2crossrefxml v1.0
+This is free software.  You may redistribute copies of it under the
+terms of the GNU General Public License
+http://www.gnu.org/licenses/gpl.html.  There is NO WARRANTY, to the
+extent permitted by law.
+$USAGE
+END
  use Getopt::Std;
  my %opts;
- getopts('c:o:',\%opts) or die $USAGE;
+ getopts('c:o:hV',\%opts) or die $USAGE;
+
+if ($opts{h} || $opts{V}){
+    print $VERSION;
+    exit 0;
+}
 
  ################################################################
  # Defaults and parameters

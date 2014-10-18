@@ -56,8 +56,21 @@ use LWP::UserAgent;
 use TeX::Encode;
 
 my $USAGE="USAGE: $0  [-o output] file\n";
+my $VERSION = <<END;
+bibzbladd v1.0
+This is free software.  You may redistribute copies of it under the
+terms of the GNU General Public License
+http://www.gnu.org/licenses/gpl.html.  There is NO WARRANTY, to the
+extent permitted by law.
+$USAGE
+END
 my %opts;
-getopts('o:',\%opts) or die $USAGE;
+getopts('o:hV',\%opts) or die $USAGE;
+
+if ($opts{h} || $opts{V}){
+    print $VERSION;
+    exit 0;
+}
 
 ################################################################
 # Defaults and parameters

@@ -1,0 +1,9 @@
+			 Crossrefware Bundle
+
+Scripts useful for working with crossref.org.
+
+bibdoiadd.pl       - add DOI numbers to papers in a given bib file
+bibzbladd.pl       - add Zbl numbers to papers in a given bib file
+ltx2crossrefxml.pl - a tool for creation of XML files for submitting to crossref.org
+
+
