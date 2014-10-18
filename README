@@ -1,4 +1,6 @@
 			 Crossrefware Bundle
+			     version 1.0
+
 
 Scripts useful for working with crossref.org.
 
@@ -6,4 +8,10 @@ bibdoiadd.pl       - add DOI numbers to papers in a given bib file
 bibzbladd.pl       - add Zbl numbers to papers in a given bib file
 ltx2crossrefxml.pl - a tool for creation of XML files for submitting to crossref.org
 
+Installation:
 
+1.  Move *.pl files to the binaries directory in your system.
+
+2.  Use *.cfg files as configuration files samples.
+
+3.  Move *.1 to the man pages directory in your system.
