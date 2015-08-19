@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			     version 1.0
+			     version 1.1
 
 
 Scripts useful for working with crossref.org.
@@ -15,3 +15,8 @@ Installation:
 2.  Use *.cfg files as configuration files samples.
 
 3.  Move *.1 to the man pages directory in your system.
+
+
+Changes:
+
+        version 1.1:  workaround for a bug with macrons in TeX::Encode

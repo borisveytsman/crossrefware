@@ -56,7 +56,7 @@ Boris Veytsman
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012  Boris Veytsman
+Copyright (C) 2012-2015  Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
@@ -373,6 +373,17 @@ sub SanitizeText {
     $string =~ s/\\doi/DOI: /g;
     $string =~ s/\\\\/ /g;
     $string =~ s/\$//g;
+    # Another bug in decode: it does not understan macrons
+    $string =~ s/\\=(A|\{A\})/&#256;/
+    $string =~ s/\\=(a|\{a\})/&#257;/
+    $string =~ s/\\=(E|\{E\})/&#274;/
+    $string =~ s/\\=(e|\{e\})/&#275;/
+    $string =~ s/\\=(I|\{I\})/&#298;/
+    $string =~ s/\\=(i|\{i\})/&#299;/
+    $string =~ s/\\=(O|\{O\})/&#332;/
+    $string =~ s/\\=(o|\{o\})/&#333;/
+    $string =~ s/\\=(U|\{U\})/&#362;/
+    $string =~ s/\\=(u|\{u\})/&#363;/
     $string = decode('latex', $string);
     $string =~ s/\\[a-zA-Z]+/ /g;
     $string =~ s/\\\\/ /g;
