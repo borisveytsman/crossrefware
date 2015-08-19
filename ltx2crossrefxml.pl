@@ -374,17 +374,17 @@ sub SanitizeText {
     $string =~ s/\\\\/ /g;
     $string =~ s/\$//g;
     # Another bug in decode: it does not understan macrons
-    $string =~ s/\\=(A|\{A\})/Z#256;/g;
-    $string =~ s/\\=(a|\{a\})/Z#257;/g;
-    $string =~ s/\\=(E|\{E\})/Z#274;/g;
-    $string =~ s/\\=(e|\{e\})/Z#275;/g;
-    $string =~ s/\\=(I|\{I\})/Z#298;/g;
-    $string =~ s/\\=(i|\{i\})/Z#299;/g;
-    $string =~ s/\\=(O|\{O\})/Z#332;/g;
-    $string =~ s/\\=(o|\{o\})/Z#333;/g;
-    $string =~ s/\\=(U|\{U\})/Z#362;/g;
-    $string =~ s/\\=(u|\{u\})/Z#363;/g;
-    $string = decode('latex', $string);
+    $string =~ s/\\=(A|\{A\})/#@SANITIZE@MACRON@#256;/g;
+    $string =~ s/\\=(a|\{a\})/#@SANITIZE@MACRON@#257;/g;
+    $string =~ s/\\=(E|\{E\})/#@SANITIZE@MACRON@#274;/g;
+    $string =~ s/\\=(e|\{e\})/#@SANITIZE@MACRON@#275;/g;
+    $string =~ s/\\=(I|\{I\})/#@SANITIZE@MACRON@#298;/g;
+    $string =~ s/\\=(i|\{i\})/#@SANITIZE@MACRON@#299;/g;
+    $string =~ s/\\=(O|\{O\})/#@SANITIZE@MACRON@#332;/g;
+    $string =~ s/\\=(o|\{o\})/#@SANITIZE@MACRON@#333;/g;
+    $string =~ s/\\=(U|\{U\})/#@SANITIZE@MACRON@#362;/g;
+    $string =~ s/\\=(u|\{u\})/#@SANITIZE@MACRON@#363;/g;
+    $string = decode('latex', $string);    
     $string =~ s/\\[a-zA-Z]+/ /g;
     $string =~ s/\\\\/ /g;
     $string =~ s/[\[\{\}\]]/ /g;
@@ -393,6 +393,7 @@ sub SanitizeText {
     $string =~ s/amp;//g;
     $string =~ s/~/ /g;
     $string =~ s/\s*([\.;,])/$1/g;
+    $string =~ s/#@SANITIZE@MACRON@#(\d+);/&#$1;/g;
     return $string;
 }
 
