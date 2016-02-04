@@ -68,6 +68,8 @@ extent permitted by law.
 
  use strict;
  use POSIX qw(strftime);
+ use BibTeX::Parser;
+ use LaTeX::ToUnicode qw (convert);
  use Text::BibTeX;
  use Text::BibTeX::Name;
  use TeX::Encode;
@@ -292,7 +294,7 @@ END
 ###############################################################
 sub PrintPaper {
     my $paper = shift;
-    my $title=SanitizeText($paper->{title});
+    my $title=convert($paper->{title});
     my $url=GetURL($paper);
     print OUT <<END;
       <journal_article publication_type="full_text">
