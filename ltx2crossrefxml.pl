@@ -68,19 +68,13 @@ extent permitted by law.
 
  use strict;
  use POSIX qw(strftime);
- use BibTeX::Parser;
+ use BibTeX::Parser::Author;
  use LaTeX::ToUnicode qw (convert);
- use Text::BibTeX;
- use Text::BibTeX::Name;
- use TeX::Encode;
- use Encode;
- use HTML::Entities;
- use XML::Entities;
  use File::Basename;
  use File::Spec;
  my $USAGE="USAGE: $0 [-c config] [-o output] file1 file2 ...\n";
 my $VERSION = <<END;
-ltx2crossrefxml v1.0
+ltx2crossrefxml v2.0
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
 http://www.gnu.org/licenses/gpl.html.  There is NO WARRANTY, to the
@@ -90,6 +84,8 @@ END
  use Getopt::Std;
  my %opts;
  getopts('c:o:hV',\%opts) or die $USAGE;
+ use utf8;
+ binmode(STDOUT, ":utf8");
 
 if ($opts{h} || $opts{V}){
     print $VERSION;
@@ -104,6 +100,7 @@ if ($opts{h} || $opts{V}){
  
  if (defined($opts{o})) {
      open (OUT, ">$opts{o}") or die "Cannot open file $opts{o} for writing\n";
+     binmode(OUT, ":utf8")
  }
 
 
@@ -360,9 +357,7 @@ END
 ###############################################################
 sub SanitizeText {
     my $string = shift;
-    # There is a bug in the decode function, which we need to work 
-    # around:  it adds space to constructions like \o x
-    $string =~ s/(\\[a-zA-Z])\s+/$1/g;
+    $string = convert($string);
     $string =~ s/\\newblock//g;
     $string =~ s/\\bgroup//g;
     $string =~ s/\\egroup//g;
@@ -375,27 +370,9 @@ sub SanitizeText {
     $string =~ s/\\doi/DOI: /g;
     $string =~ s/\\\\/ /g;
     $string =~ s/\$//g;
-    # Another bug in decode: it does not understan macrons
-    $string =~ s/\\=(A|\{A\})/##SANITIZE#MACRON##256;/g;
-    $string =~ s/\\=(a|\{a\})/##SANITIZE#MACRON##257;/g;
-    $string =~ s/\\=(E|\{E\})/##SANITIZE#MACRON##274;/g;
-    $string =~ s/\\=(e|\{e\})/##SANITIZE#MACRON##275;/g;
-    $string =~ s/\\=(I|\{I\})/##SANITIZE#MACRON##298;/g;
-    $string =~ s/\\=(i|\{i\})/##SANITIZE#MACRON##299;/g;
-    $string =~ s/\\=(O|\{O\})/##SANITIZE#MACRON##332;/g;
-    $string =~ s/\\=(o|\{o\})/##SANITIZE#MACRON##333;/g;
-    $string =~ s/\\=(U|\{U\})/##SANITIZE#MACRON##362;/g;
-    $string =~ s/\\=(u|\{u\})/##SANITIZE#MACRON##363;/g;
-    $string = decode('latex', $string);    
-    $string =~ s/\\[a-zA-Z]+/ /g;
-    $string =~ s/\\\\/ /g;
-    $string =~ s/[\[\{\}\]]/ /g;
-    $string = encode_entities($string);
-    $string = XML::Entities::numify('all', $string);
-    $string =~ s/amp;//g;
+    $string =~ s/\\checkcomma/,/g;
     $string =~ s/~/ /g;
-    $string =~ s/\s*([\.;,])/$1/g;
-    $string =~ s/##SANITIZE#MACRON##(\d+);/&#$1;/g;
+    $string =~ s/[\{\}]//g;
     return $string;
 }
 
@@ -405,11 +382,10 @@ sub SanitizeText {
 sub PrintAuthor {
     my $author=shift;
 
-    my $person=new Text::BibTeX::Name ($author);
+    my $person=new BibTeX::Parser::Author ($author);
 
-    if ($person->part('first')) {
-	my @tokens = $person->part('first');
-	my $line = join(" ", @tokens);
+    if ($person->first) {
+	my $line = $person->first;
 	$line = SanitizeText($line);
 	print OUT <<END;
             <given_name>$line</given_name>
@@ -417,16 +393,19 @@ END
 
     }
 
-    if ($person->part('last')) {
-	my $line = SanitizeText($person->part('last'));
+    if ($person->last) {
+	my $line = SanitizeText($person->last);
+	if ($person->von) {
+	    $line = SanitizeText($person->von)." $line";
+	}
 	print OUT <<END;
             <surname>$line</surname>
 END
 
     }
 
-    if ($person->part('jr')) {
-	my $line = SanitizeText($person->part('jr'));
+    if ($person->jr) {
+	my $line = SanitizeText($person->jr);
 	print OUT <<END;
             <suffix>$line</suffix>
 END
