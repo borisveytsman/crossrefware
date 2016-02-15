@@ -56,7 +56,7 @@ Boris Veytsman
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2015  Boris Veytsman
+Copyright (C) 2012-2016  Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
@@ -67,6 +67,14 @@ extent permitted by law.
 =cut
 
  use strict;
+
+ BEGIN {
+     # find files relative to our installed location within TeX Live
+     chomp(my $TLMaster = `kpsewhich -var-value=SELFAUTOPARENT`); # TL root
+     if (length($TLMaster)) {
+	 unshift @INC, "$TLMaster/texmf-dist/scripts/bibtexperllibs";
+     }
+ }
  use POSIX qw(strftime);
  use BibTeX::Parser::Author;
  use LaTeX::ToUnicode qw (convert);

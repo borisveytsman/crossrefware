@@ -51,6 +51,13 @@ extent permitted by law.
 =cut
 
 use strict;
+BEGIN {
+    # find files relative to our installed location within TeX Live
+    chomp(my $TLMaster = `kpsewhich -var-value=SELFAUTOPARENT`); # TL root
+    if (length($TLMaster)) {
+	unshift @INC, "$TLMaster/texmf-dist/scripts/bibtexperllibs";
+    }
+}
 use IO::File;
 use BibTeX::Parser;
 use Getopt::Std;

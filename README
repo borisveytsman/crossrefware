@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			     version 1.1
+			     version 2.0
 
 
 Scripts useful for working with crossref.org.
@@ -19,4 +19,6 @@ Installation:
 
 Changes:
 
-        version 1.1:  workaround for a bug with macrons in TeX::Encode
+        Version 2.0:  Moved to BibTeX::Parser suite and new Zbmath interface
+
+        Version 1.1:  workaround for a bug with macrons in TeX::Encode
