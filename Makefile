@@ -37,4 +37,5 @@ crossrefware.tex: ${SCRIPTS}
 	pod2latex -modify -full -prefile head.ltx -out $@ $+
 
 archive: all clean
-	cd ..; tar -czvf crossrefware.tgz crossref --exclude CVS
+	cd ..; tar -czvf crossrefware.tgz crossref --exclude CVS \
+	--exclude test --exclude *.bib

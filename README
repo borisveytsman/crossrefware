@@ -8,6 +8,8 @@ bibdoiadd.pl       - add DOI numbers to papers in a given bib file
 bibzbladd.pl       - add Zbl numbers to papers in a given bib file
 ltx2crossrefxml.pl - a tool for creation of XML files for submitting to crossref.org
 
+The scripts use bibtexperllibs libraries from CTAN
+
 Installation:
 
 1.  Move *.pl files to the binaries directory in your system.
@@ -19,6 +21,8 @@ Installation:
 
 Changes:
 
-        Version 2.0:  Moved to BibTeX::Parser suite and new Zbmath interface
+        Version 2.0:  Moved to BibTeX::Parser suite.
+                      Now we use new Zbmath interface.
+                      Now we use bibtexperllibs libraries
 
         Version 1.1:  workaround for a bug with macrons in TeX::Encode
