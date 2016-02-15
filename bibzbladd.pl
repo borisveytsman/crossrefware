@@ -91,7 +91,7 @@ if ($opts{o}) {
 my $forceSearch=$opts{f};
 
 my $input= IO::File->new($inputfile) or 
-    die "Cannot BibTeX file $inputfile\n$USAGE\n";
+    die "Cannot find BibTeX file $inputfile\n$USAGE\n";
 my $output = IO::File->new("> $outputfile") or 
     die "Cannot write to $outputfile\n$USAGE\n";
 
@@ -145,7 +145,7 @@ sub GetZbl {
     
     my @query;
 
-    my $string=uri_escape($entry->to_string());
+    my $string=uri_escape_utf8($entry->to_string());
     
 
 
