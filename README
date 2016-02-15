@@ -2,7 +2,7 @@
 			     version 2.0
 
 
-Scripts useful for working with crossref.org.
+Scripts useful for working with crossref.org and Zentralblatt MATH.
 
 bibdoiadd.pl       - add DOI numbers to papers in a given bib file
 bibzbladd.pl       - add Zbl numbers to papers in a given bib file
