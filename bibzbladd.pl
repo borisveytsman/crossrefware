@@ -14,6 +14,10 @@ bibzbladd  [B<-f>] [B<-o> I<output>] I<bib_file>
 
 =over 4
 
+=item B<-d>
+
+Debug mode
+
 =item B<-f>
 
 Force searching for Zbl numbers even if the entry already has one.
@@ -64,7 +68,7 @@ use Getopt::Std;
 use URI::Escape;
 use LWP::UserAgent;
 
-my $USAGE="USAGE: $0  [-f] [-o output] file\n";
+my $USAGE="USAGE: $0  [-d] [-f] [-o output] file\n";
 my $VERSION = <<END;
 bibzbladd v2.0
 This is free software.  You may redistribute copies of it under the
@@ -74,7 +78,7 @@ extent permitted by law.
 $USAGE
 END
 my %opts;
-getopts('fo:hV',\%opts) or die $USAGE;
+getopts('dfo:hV',\%opts) or die $USAGE;
 
 if ($opts{h} || $opts{V}){
     print $VERSION;
@@ -96,6 +100,8 @@ if ($opts{o}) {
 }
 
 my $forceSearch=$opts{f};
+
+my $debug = $opts{d};
 
 my $input= IO::File->new($inputfile) or 
     die "Cannot find BibTeX file $inputfile\n$USAGE\n";
@@ -120,15 +126,28 @@ while (my $entry = $parser->next ) {
     }
     if (!($entry->type() eq 'ARTICLE')) {
 	print $output $entry->raw_bibtex(), "\n\n";
+	if ($debug) {
+	    print STDERR "DEBUG:  entry ", $entry->key(), 
+	    " is not article but ", $entry->type(), "\n";
+	}
 	next;
     }
     if ($entry->has('zblnumber') && !$forceSearch) {
 	print $output $entry->raw_bibtex(), "\n\n";
+	if ($debug) {
+	    print STDERR "DEBUG:  entry ", $entry->key(), 
+	    " has zblnumber ", $entry->field('zblnumber'), 
+	    " and no forced search is requested\n";
+	}
 	next;
     }
     
 
      # Now we have an entry with no Zbl.  Let us get to work.
+    if ($debug) {
+	print STDERR "DEBUG:  Searching for zbl number for entry ",
+	$entry->key, "\n";
+    }
      my $zbl = GetZbl($entry, $userAgent, $mirror);
      if (length($zbl)) {
  	$entry->field('zblnumber',$zbl);
@@ -154,12 +173,26 @@ sub GetZbl {
 
     my $string=uri_escape_utf8($entry->to_string());
     
+    if ($debug) {
+	print STDERR "DEBUG:  query: $mirror?bibtex=$string\n" ;
+    }
 
 
     my $response = $userAgent->get("$mirror?bibtex=$string");
+    if ($debug) {
+	print STDERR "DEBUG:  response: ",
+	$response->decoded_content, "\n";
+    }
+    
     if ($response->decoded_content =~ /^\s*"zbl_id":\s*"(.*)",\s*$/m) {
+	if ($debug) {
+	    print STDERR "DEBUG:  got zbl: $1\n",
+	}
 	return $1;
      } else {
+	if ($debug) {
+	    print STDERR "DEBUG: Did not get zbl\n",
+	}
  	return ("");
     }
 
