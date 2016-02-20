@@ -8,7 +8,7 @@ bibzbladd.pl - add Zbl numbers to papers in a given bib file
 
 =head1 SYNOPSIS
 
-bibzbladd  [B<-f>] [B<-o> I<output>] I<bib_file>
+bibzbladd  [-d] [B<-f>] [B<-o> I<output>] I<bib_file>
 
 =head1 OPTIONS
 
@@ -67,6 +67,7 @@ use BibTeX::Parser;
 use Getopt::Std;
 use URI::Escape;
 use LWP::UserAgent;
+$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
 my $USAGE="USAGE: $0  [-d] [-f] [-o output] file\n";
 my $VERSION = <<END;
