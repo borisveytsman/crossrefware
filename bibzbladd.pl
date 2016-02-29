@@ -125,14 +125,6 @@ while (my $entry = $parser->next ) {
 	print STDERR "Skipping this entry\n";
 	next;
     }
-    if (!($entry->type() eq 'ARTICLE')) {
-	print $output $entry->raw_bibtex(), "\n\n";
-	if ($debug) {
-	    print STDERR "DEBUG:  entry ", $entry->key(), 
-	    " is not article but ", $entry->type(), "\n";
-	}
-	next;
-    }
     if ($entry->has('zblnumber') && !$forceSearch) {
 	print $output $entry->raw_bibtex(), "\n\n";
 	if ($debug) {
