@@ -8,7 +8,7 @@ bibdoiadd.pl - add DOI numbers to papers in a given bib file
 
 =head1 SYNOPSIS
 
-bibdoiadd [B<-c> I<config_file>] [B<-f>] [B<-o> I<output>] I<bib_file>
+bibdoiadd [B<-c> I<config_file>] [B<-e> 1|0] [B<-f>] [B<-o> I<output>] I<bib_file>
 
 =head1 OPTIONS
 
@@ -18,6 +18,12 @@ bibdoiadd [B<-c> I<config_file>] [B<-f>] [B<-o> I<output>] I<bib_file>
 
 Configuration file.  If this file is absent, some defaults are used.
 See below for its format.
+
+=item B<-e>
+
+If 1 (default), add empty doi if a doi cannot be fount.  This prevents
+repeated searches for long files.  Calling C<-e 0> suppresses this 
+behavior.
 
 =item B<-f>
 
@@ -75,7 +81,7 @@ Boris Veytsman
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2016  Boris Veytsman
+Copyright (C) 2014-2017  Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
@@ -99,9 +105,9 @@ use Getopt::Std;
 use URI::Escape;
 use LWP::Simple;
 
-my $USAGE="USAGE: $0 [-c config] [-f] [-o output] file\n";
+my $USAGE="USAGE: $0 [-c config] [-e 1|0] [-f] [-o output] file\n";
 my $VERSION = <<END;
-bibdoiadd v2.0
+bibdoiadd v2.1
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
 http://www.gnu.org/licenses/gpl.html.  There is NO WARRANTY, to the
@@ -109,7 +115,7 @@ extent permitted by law.
 $USAGE
 END
 my %opts;
-getopts('fc:o:hV',\%opts) or die $USAGE;
+getopts('fe:c:o:hV',\%opts) or die $USAGE;
 
 if ($opts{h} || $opts{V}){
     print $VERSION;
@@ -131,7 +137,10 @@ if ($opts{o}) {
 }
 
 my $forceSearch=$opts{f};
-
+my $forceEmpty = 1;
+if (exists $opts{e}) {
+    $forceEmpty = $opts{e};
+}				       }
 
 our $mode='free';
 our $email;
