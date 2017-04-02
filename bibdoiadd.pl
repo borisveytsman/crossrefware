@@ -21,7 +21,7 @@ See below for its format.
 
 =item B<-e>
 
-If 1 (default), add empty doi if a doi cannot be fount.  This prevents
+If 1 (default), add empty doi if a doi cannot be found.  This prevents
 repeated searches for long files.  Calling C<-e 0> suppresses this 
 behavior.
 
@@ -114,7 +114,7 @@ http://www.gnu.org/licenses/gpl.html.  There is NO WARRANTY, to the
 extent permitted by law.
 $USAGE
 END
-my %opts;
+our %opts;
 getopts('fe:c:o:hV',\%opts) or die $USAGE;
 
 if ($opts{h} || $opts{V}){
@@ -132,7 +132,7 @@ my $outputfile = $inputfile;
 
 $outputfile =~ s/\.([^\.]*)$/_doi.$1/;
 
-if ($opts{o}) {
+if (exists $opts{o}) {
     $outputfile = $opts{o};
 }
 
@@ -140,7 +140,7 @@ my $forceSearch=$opts{f};
 my $forceEmpty = 1;
 if (exists $opts{e}) {
     $forceEmpty = $opts{e};
-}				       }
+}		
 
 our $mode='free';
 our $email;
@@ -205,7 +205,7 @@ while (my $entry = $parser->next) {
     
 
      my $doi = GetDoi($prefix, $entry);
-     if (length($doi)) {
+     if (length($doi) || $forceEmpty) {
  	$entry->field('doi',$doi);
      }
     print $output $entry->to_string(), "\n\n";

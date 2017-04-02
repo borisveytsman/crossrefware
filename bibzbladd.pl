@@ -8,7 +8,7 @@ bibzbladd.pl - add Zbl numbers to papers in a given bib file
 
 =head1 SYNOPSIS
 
-bibzbladd  [-d] [B<-f>] [B<-o> I<output>] I<bib_file>
+bibzbladd  [-d] [B<-f>] [B<-e> 1|0] [B<-o> I<output>] I<bib_file>
 
 =head1 OPTIONS
 
@@ -45,7 +45,7 @@ Boris Veytsman
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2016  Boris Veytsman
+Copyright (C) 2014-2017  Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
@@ -69,9 +69,9 @@ use URI::Escape;
 use LWP::UserAgent;
 $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
-my $USAGE="USAGE: $0  [-d] [-f] [-o output] file\n";
+my $USAGE="USAGE: $0  [-d] [-e 1|0] [-f] [-o output] file\n";
 my $VERSION = <<END;
-bibzbladd v2.0
+bibzbladd v2.1
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
 http://www.gnu.org/licenses/gpl.html.  There is NO WARRANTY, to the
@@ -79,7 +79,7 @@ extent permitted by law.
 $USAGE
 END
 my %opts;
-getopts('dfo:hV',\%opts) or die $USAGE;
+getopts('de:fo:hV',\%opts) or die $USAGE;
 
 if ($opts{h} || $opts{V}){
     print $VERSION;
@@ -101,6 +101,11 @@ if ($opts{o}) {
 }
 
 my $forceSearch=$opts{f};
+
+my $forceEmpty = 1;
+if (exists $opts{e}) {
+    $forceEmpty = $opts{e};
+}		
 
 my $debug = $opts{d};
 
@@ -142,7 +147,7 @@ while (my $entry = $parser->next ) {
 	$entry->key, "\n";
     }
      my $zbl = GetZbl($entry, $userAgent, $mirror);
-     if (length($zbl)) {
+     if (length($zbl) || $forceEmpty) {
  	$entry->field('zblnumber',$zbl);
      }
     print $output $entry->to_string(), "\n\n";
