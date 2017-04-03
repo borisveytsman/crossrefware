@@ -1,7 +1,8 @@
 SCRIPTS = \
 	ltx2crossrefxml.pl \
 	bibdoiadd.pl \
-	bibzbladd.pl
+	bibzbladd.pl \
+	bibmradd.pl
 
 
 MAN1 = ${SCRIPTS:%.pl=%.1}
