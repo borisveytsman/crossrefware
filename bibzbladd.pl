@@ -18,6 +18,13 @@ bibzbladd  [-d] [B<-f>] [B<-e> 1|0] [B<-o> I<output>] I<bib_file>
 
 Debug mode
 
+=item B<-e>
+
+If 1 (default), add an empty zblnumber if a zbl cannot be found.  This
+prevents repeated searches for the same entries if you add new entries
+to the file.  Calling C<-e 0> suppresses this behavior.
+
+
 =item B<-f>
 
 Force searching for Zbl numbers even if the entry already has one.

@@ -22,8 +22,8 @@ See below for its format.
 =item B<-e>
 
 If 1 (default), add empty doi if a doi cannot be found.  This prevents
-repeated searches for long files.  Calling C<-e 0> suppresses this 
-behavior.
+repeated searches for the same entries if you add new entries to the
+file.  Calling C<-e 0> suppresses this behavior.
 
 =item B<-f>
 
