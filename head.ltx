@@ -9,9 +9,28 @@
 \maketitle
 \tableofcontents
 
+\section{Introduction}
+
 These scripts can be used to submit files to Crossref, check and add
-doi numbers, MathSciNet numbers and ZbMath numbers to papers.
+doi numbers, MathSciNet numbers and ZbMath numbers to papers, and to
+convert `bbl' files to `bib' files.
 
 I am grateful to Josko Plazonic from Princeton Math Dept whose
 (unpublished) Python script was an inspiration for this suite.
 
+The script \path{ltx2crossrefxml} is used to extract the information
+from a \LaTeX\ file and generate an XML file suitable for submission
+to Crossref (the organization that keeps DOI numbering system).  
+
+Several scripts, \path{bibdoiadd}, \path{bibmradd} and \path{bibmradd}
+take a \path{bib} file, and add to each entry a DOI, MR or ZBL number
+correspondingly, if they can find this entry in the corresponding
+database.   
+
+Script \path{bbl2bib} tries to reconstruct a \path{bib} file from the
+corresponding \path{thebibliography} environment.  One can argue that
+this operation is akin to reconstructing a cow from the steak.  The
+way the script does it is searching for the entry in the MR, ZBL and
+DOI databases, and creating the corresponding Bib\TeX\ fields.  
+
+Below are manual pages for these scripts.  

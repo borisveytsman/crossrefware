@@ -65,15 +65,15 @@ The configuration file is mostly self-explanatory: it has comments
 
    $field = value ;
 
-The important parameters are C<$mode> (C<'free'> or C<'paid'>,
+The important parameters are C<$mode> (C<'free'> or C<'paid'>),
 C<$email> (for free users) and C<$username> & C<$password> for paid
 members.
 
 
 =head1 EXAMPLES
 
-   bibdoiadd -c bibdoiadd.cfg citations.bib > result.bib
-   bibdoiadd -c bibdoiadd.cfg citations.bib -o result.bib
+   bibdoiadd -c bibdoiadd.cfg -o - citations.bib > result.bib
+   bibdoiadd -c bibdoiadd.cfg -o result.bib citations.bib 
 
 =head1 AUTHOR
 
