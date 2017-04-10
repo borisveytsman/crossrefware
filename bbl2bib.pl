@@ -28,14 +28,11 @@ output file is formed by changing the extension to C<.bib>
 =item B<-s> I<search_order>
 
 The databases to search for the article or book.  A sequence of
-letters C<a>, C<m>, C<d> and C<z>, by default C<amzd>.  The letters
+letters C<m>, C<d> and C<z>, by default C<mzd>.  The letters
 mean:
 
 =over 4
 
-=item B<a>
-
-ArXiv, C<https://arxiv.org/>, the e-print service.
 
 =item B<m> 
 
@@ -54,10 +51,10 @@ identifiers.
 =back
 
 Note that at present searches in the crossref database require an
-account, so if you do not have one, you may want to use C<-s amz>
+account, so if you do not have one, you may want to use C<-s mz>
 option to exclude Crossref from searches.  Note also that after the
 item is found in any database, the search is stopped, so if you use
-C<-s amzd> (the default), and the citation is found in MathSciNet,
+C<-s mzd> (the default), and the citation is found in MathSciNet,
 neither zbMATH nor Crossref is searched for the citation.
 
 =back
@@ -146,6 +143,7 @@ BEGIN {
 }
 use IO::File;
 use BibTeX::Parser;
+use FileHandle;
 use LaTeX::ToUnicode qw (convert);
 use Getopt::Std;
 use URI::Escape;
@@ -187,6 +185,8 @@ if (exists $opts{s}) {
     $searchOrder=$opts{s};
 }
 
+$searchOrder =~ s/\s//g;
+
 # For Crossref
 our $mode='free';
 our $email;
@@ -221,6 +221,11 @@ my $input= IO::File->new($inputfile) or
 my $output = IO::File->new("> $outputfile") or 
     die "Cannot write to $outputfile\n$USAGE\n";
 
+my $userAgent = LWP::UserAgent->new;
+
+
+# Bibitem is a hash with the entries 'key', 'text', 'mrnumber',
+# 'arxiv', 'zbl'
 my $bibitem;
 
 while (<$input>) {
@@ -228,12 +233,14 @@ while (<$input>) {
 	/\\begin\{thebibliography\}/ || /\\end\{thebibliography\}/) {
 	next;
     }
-    if (/\\bibitem(\[[^\]]*\])?\{[^\}]*\}/) {
+    if (/\\bibitem(\[[^\]]*\])?\{([^\}]*)\}/) {
 	ProcessBibitem($bibitem);
-	$bibitem = "";
+	$bibitem = undef;
+	$bibitem->{key}=$2;
+	$bibitem->{text}="";
     }
     if (!/^\s*$/) {
-	$bibitem .= $_;
+	$bibitem -> {text} .= $_;
     }
 }
 ProcessBibitem($bibitem);
@@ -243,23 +250,85 @@ exit 0;
 
 sub ProcessBibitem {
     my $bibitem = shift;
-    if (!length($bibitem) || $bibitem =~ /^\s+$/s) {
+    my $key = $bibitem->{key};
+    my $text=$bibitem->{text};
+    if (!length($text) || $text =~ /^\s+$/s) {
 	return;
     }
-    my $printbibitem = $bibitem;
-    $printbibitem =~ s/^(.)/% $1/gm;
-    print $output "$printbibitem";
+    my $printtext = $text;
+    $printtext =~ s/^(.)/% $1/gm;
+    print $output "$printtext";
 
-    $bibitem =~ s/\n/ /mg;
-    $bibitem =~ s/\\bibitem(\[[^\]]*\])?\{[^\}]*\}//;
-    #
-    # Shortcuts
-    #
-    if ($bibitem =~ s/\\arxiv\{([^\}]+)\}\.?//) {
-	print "Got arxiv!\n";
+    $text =~ s/\n/ /mg;
+    $text =~ s/\\bibitem(\[[^\]]*\])?\{[^\}]*\}//;
+
+    # Arxiv entry?
+    if ($text =~ s/\\arxiv\{([^\}]+)\}\.?//) {
+	$bibitem->{arxiv}=$1;
     }
-    print $bibitem, "\n";
-    
+
+    # Mr number exists?
+    if ($text =~ s/\\mr\{([^\}]+)\}\.?//) {
+	$bibitem->{mr}=$1;
+    }
+
+    # zbl  number exists?
+    if ($text =~ s/\\zbl\{([^\}]+)\}\.?//) {
+	$bibitem->{zbl}=$1;
+    }
+
+    # doi  number exists?
+    if ($text =~ s/\\doi\{([^\}]+)\}\.?//) {
+	$bibitem->{doi}=$1;
+    }
+
+    print $key, "\n";
+    print $text, "\n";
+    foreach my $dbletter (split (//, $searchOrder)) {
+	if ($dbletter eq 'm') {
+	    $bibitem->{bib} = SearchMref($bibitem);
+	}
+	if (ref($bibitem->{bib})) {
+	    PrintBibitem($bibitem);
+	    return;
+	}
+    }
+}
+
+
+sub SearchMref {
+    my $bibitem = shift;
+    my $mirror = "http://www.ams.org/mathscinet-mref";
+    my $string=uri_escape_utf8($bibitem->{text});
+    my $response = $userAgent->get("$mirror?ref=$string&dataType=bibtex") ->
+	decoded_content();
+    if ($response =~ /<pre>(.*)<\/pre>/s) {
+	my $bib= $1;
+	my $fh = new FileHandle;
+	open $fh, "<", \$bib;
+	my $parser = new BibTeX::Parser($fh);
+	my $entry = $parser->next;
+	if ($entry->parse_ok()) {
+	    $entry->key($bibitem->{key});
+	    return ($entry);
+	}
+    }
+}
+
+sub PrintBibitem {
+    my $bibitem = shift;
+    if (!ref($bibitem->{bib})) {
+	return;
+    }
+    my $entry=$bibitem->{bib};
+    if ($entry->field('mrnumber')) {
+	my $mr=$entry->field('mrnumber');
+	while (length($mr)<7) {
+	    $mr = "0$mr";
+	}
+	$mr=$entry->field('mrnumber', $mr);
+    }
+    print $bibitem->{bib}->to_string(), "\n\n";
 }
 
 sub SanitizeText {
