@@ -22,7 +22,8 @@ all:  ${MAN1} ${PDF}
 
 
 clean:
-	$(RM) *.aux *.toc *.log *.tex *.idx *.ilg *.ind *.out *.zip *.tgz
+	$(RM) *.aux *.toc *.log *.tex *.idx *.ilg *.ind *.out *.zip *.tgz \
+	*~
 
 distclean: clean
 	$(RM) *.pdf *.1 *.3
@@ -39,5 +40,5 @@ crossrefware.tex: ${SCRIPTS}
 	pod2latex -modify -full -prefile head.ltx -out $@ $+
 
 archive: all clean
-	cd ..; tar -czvf crossrefware.tgz crossref --exclude CVS \
-	--exclude test --exclude *.bib
+	cd ..; tar -czvf crossrefware.tgz  --exclude 'CVS' \
+	--exclude 'test' --exclude *.bib crossref
