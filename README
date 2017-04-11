@@ -26,6 +26,7 @@ Changes:
         Version 2.1:  New options to add empty doi and zbl when doi or zbl
 		      are not found to prevent repeated searches.
 		      Added bibmradd.pl
+		      Added bbl2bib.pl
 
         Version 2.0:  Moved to BibTeX::Parser suite.
                       Now we use new Zbmath interface.
