@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			     version 2.1
+			     version 2.1a
 
 
 Scripts useful for working with Crossref, MathSciNet and Zentralblatt MATH.
@@ -25,6 +25,8 @@ Installation:
 
 
 Changes:
+
+        Version 2.1a: Bug in bbl2bib corrected
 
         Version 2.1:  New options to add empty doi and zbl when doi or zbl
 		      are not found to prevent repeated searches.
