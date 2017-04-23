@@ -216,7 +216,7 @@ sub SearchMref {
 	open $fh, "<", \$bib;
 	my $parser = new BibTeX::Parser($fh);
 	my $entry = $parser->next;
-	if ($entry->parse_ok()) {
+	if (ref($entry) && $entry->parse_ok()) {
 	    $entry->key($bibitem->{key});
 	    return ($entry);
 	}
