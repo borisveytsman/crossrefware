@@ -40,5 +40,5 @@ crossrefware.tex: ${SCRIPTS}
 	pod2latex -modify -full -prefile head.ltx -out $@ $+
 
 archive: all clean
-	cd ..; tar -czvf crossrefware.tgz  --exclude 'CVS' \
+	cd ..; tar -czvf crossrefware.tgz  --exclude '.git' \
 	--exclude 'test' --exclude *.bib crossref
