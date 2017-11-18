@@ -5,6 +5,7 @@ SCRIPTS = \
 	bibmradd.pl \
 	bbl2bib.pl
 
+PACKAGE = crossrefware
 
 MAN1 = ${SCRIPTS:%.pl=%.1}
 
@@ -40,5 +41,4 @@ crossrefware.tex: ${SCRIPTS}
 	pod2latex -modify -full -prefile head.ltx -out $@ $+
 
 archive: all clean
-	cd ..; COPYFILE_DISABLE=1 tar -czvf crossrefware.tgz  --exclude 'CVS' \
-	--exclude 'test' --exclude *.bib crossref
+	COPYFILE_DISABLE=1 tar -C .. -czvf ../$(PACKAGE).tgz --exclude '*~' --exclude '*.tgz' --exclude '*.zip'  --exclude CVS --exclude '.git*' $(PACKAGE); mv ../$(PACKAGE).tgz .
