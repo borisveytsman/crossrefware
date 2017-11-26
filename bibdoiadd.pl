@@ -39,9 +39,9 @@ output file is formed by adding C<_doi> to the input file
 =head1 DESCRIPTION
 
 The script reads a BibTeX file.  It checks whether the entries have
-DOIs.  If now, tries to contact http://www.crossref.org to get the
+DOIs.  If not, it tries to contact http://www.crossref.org to get the
 corresponding DOI.  The result is a BibTeX file with the fields
-C<doi=...> added.  
+C<doi=...> added.
 
 The name of the output file is either set by the B<-o> option or 
 is derived by adding the suffix C<_doi> to the output file.

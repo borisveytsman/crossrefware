@@ -117,10 +117,6 @@ while (my $entry = $parser->next) {
 	next;
     }
 
-    if (!($entry->type() eq 'ARTICLE')) {
-	print $output $entry->raw_bibtex(), "\n\n";
-	next;
-    }
     if ($entry->has('doi') || !$entry->has('url')) {
 	print $output $entry->raw_bibtex(), "\n\n";
 	next;

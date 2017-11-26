@@ -3,6 +3,7 @@ SCRIPTS = \
 	bibdoiadd.pl \
 	bibzbladd.pl \
 	bibmradd.pl \
+	biburl2doi.pl \
 	bbl2bib.pl
 
 PACKAGE = crossrefware
