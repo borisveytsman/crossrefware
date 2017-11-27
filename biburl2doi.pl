@@ -4,7 +4,7 @@
 
 =head1 NAME
 
-biburl2doi.pl - convert URLs pointing to doi.org to doi
+biburl2doi.pl - convert URLs pointing to doi.org to DOIs
 
 =head1 SYNOPSIS
 
@@ -30,8 +30,7 @@ output file is formed by adding C<_cleaned> to the input file
 
 The script recognizes URL fields of the kind
 C<http://dx.doi.org> and their variants and converts them to DOI
-fields (see also L<biburl2doi(1)> script).  The switch B<-u>
-suppresses this cleanup.  
+fields.  
 
 
 =head1 AUTHOR
@@ -40,7 +39,7 @@ Boris Veytsman
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2017  Boris Veytsman
+Copyright (C) 2017  Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License

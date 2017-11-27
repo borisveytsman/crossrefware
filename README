@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			     version 2.2
+			  version 2017/11/26
 
 
 Scripts useful for working with Crossref, MathSciNet and Zentralblatt MATH.
@@ -11,6 +11,7 @@ bibdoiadd.pl       - add DOI numbers to papers in a given bib file
 bibzbladd.pl       - add Zbl numbers to papers in a given bib file
 bibmradd.pl        - add MR  numbers to papers in a given bib file
 bbl2bib.pl         - convert `thebibliography' environment to a bib file
+biburl2doi.pl      - convert urls pointing to doi.org to dois
 ltx2crossrefxml.pl - a tool for creation of XML files for submitting to crossref.org
 
 The scripts use bibtexperllibs libraries from CTAN
@@ -25,6 +26,14 @@ Installation:
 
 
 Changes:
+
+	2017/11/26:   - Switched to date-based versioning for the
+		        bundle. 
+                      - bbl2bib now converts urls starting with
+	                http(s)://(dx.)doi.org to dois.  This functionality
+		        is also provided by a separate script biburl2doi
+		      - bibadddoi now has the option to (not) canonize
+		        names
 
 	Version 2.2:  We now treat absent CA permissively.
 		      New debug options for bbl2bib

@@ -114,7 +114,7 @@ use LWP::Simple;
 $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
 
-my $USAGE="USAGE: $0 [-o output] file\n";
+my $USAGE="USAGE: $0 [-d] [-u] [-o output] file\n";
 my $VERSION = <<END;
 bbl2bib v2.3
 This is free software.  You may redistribute copies of it under the
