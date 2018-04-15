@@ -27,6 +27,9 @@ Installation:
 
 Changes:
 
+	2018/04/15    - Fixed a bug in bibzbladd
+		      - Work around a bug in mathscinet
+
 	2017/11/26:   - Switched to date-based versioning for the
 		        bundle. 
                       - bbl2bib now converts urls starting with
