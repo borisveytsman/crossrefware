@@ -172,7 +172,7 @@ while (<$input>) {
 	/\\begin\{thebibliography\}/ || /\\end\{thebibliography\}/) {
 	next;
     }
-    if (/\\bibitem(\[[^\]]*\])?\{([^\}]*)\}/) {
+    if (/\\bibitem\s*(\[[^\]]*\])?\{([^\}]*)\}/) {
 	ProcessBibitem($bibitem);
 	$bibitem = undef;
 	$bibitem->{key}=$2;
