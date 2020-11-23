@@ -223,13 +223,17 @@ sub PrintHead {
         ? "\n$indent<abbrev_title>$abbrevTitle</abbrev_title>"
         : "";
 
+    # as of schema version 4.3.4, crossref renamed the <name> element
+    # inside <depositor> to <depositor_name>. Sigh. Something to take
+    # into account with older schemas.
+    # https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/schema-versions/
     print OUT <<END;
 <doi_batch xmlns="http://www.crossref.org/schema/4.4.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.4.2" xsi:schemaLocation="http://www.crossref.org/schema/4.4.2 http://www.crossref.org/schema/deposit/crossref4.4.2.xsd">
   <head>
     <doi_batch_id>$batchId</doi_batch_id>
     <timestamp>$timestamp</timestamp>
     <depositor>
-      <name>$depositorName</name>
+      <depositor_name>$depositorName</depositor_name>
       <email_address>$depositorEmail</email_address>
     </depositor>
     <registrant>$registrant</registrant>
