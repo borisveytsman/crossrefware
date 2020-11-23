@@ -224,7 +224,7 @@ sub PrintHead {
         : "";
 
     print OUT <<END;
-<doi_batch xmlns="http://www.crossref.org/schema/4.3.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.3.8" xsi:schemaLocation="http://www.crossref.org/schema/4.3.8 http://www.crossref.org/schema/deposit/crossref4.3.8.xsd">
+<doi_batch xmlns="http://www.crossref.org/schema/4.4.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.4.2" xsi:schemaLocation="http://www.crossref.org/schema/4.4.2 http://www.crossref.org/schema/deposit/crossref4.4.2.xsd">
   <head>
     <doi_batch_id>$batchId</doi_batch_id>
     <timestamp>$timestamp</timestamp>
