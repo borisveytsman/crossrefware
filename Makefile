@@ -1,3 +1,5 @@
+# Makefile for the (La0TeX crossrefware package. Public domain.
+
 SCRIPTS = \
 	ltx2crossrefxml.pl \
 	bibdoiadd.pl \
@@ -18,14 +20,12 @@ all:  ${MAN1} ${PDF}
 
 
 %.1: %.pl
-	pod2man -c "CROSSREF LIBRARY" -n $* -s 1 -r "" $< > $@
-
+	pod2man -c "LATEX CROSSREFWARE" -n $* -s 1 -r "" $< > $@
 
 
 
 clean:
-	$(RM) *.aux *.toc *.log *.tex *.idx *.ilg *.ind *.out *.zip *.tgz \
-	*~
+	$(RM) *.aux *.toc *.log *.tex *.idx *.ilg *.ind *.out *.zip *.tgz *~
 
 distclean: clean
 	$(RM) *.pdf *.1 *.3

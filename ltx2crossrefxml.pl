@@ -33,9 +33,9 @@ For each given I<latex_file>, this script reads C<.bbl> and C<.rpi>
 files, representing bibliographic information, and outputs corresponding
 XML that can be uploaded to Crossref (L<https://crossref.org>).
 
-The C<.rpi> files are output by the C<resphilosophica> package
+These C<.rpi> files are output by the C<resphilosophica> package
 (L<https://ctan.org/pkg/resphilosophica>). They can also be created by
-hand.
+hand; they describe each reference in the bibliography.
 
 The processing of the reference list is at present rather limited: only
 so-called unstructured references are produced for Crossref.
@@ -43,7 +43,7 @@ so-called unstructured references are produced for Crossref.
 =head1 CONFIGURATION FILE FORMAT
 
 The configuration file is mostly self-explanatory: it has comments
-(starting with C<#>) and assginments in the form
+(starting with C<#>) and assignments in the form
 
    $field = value ;
 
