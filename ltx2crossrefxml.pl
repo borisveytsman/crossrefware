@@ -163,7 +163,7 @@ END
  our $depositorEmail='DEPOSITOR_EMAIL';
  our $registrant='REGISTRANT';
  our $fullTitle = "FULL TITLE";
- our $abbrevTitle = "ABBR. Title.";
+ our $abbrevTitle = "ABBR. TTL.";
  our $issn = "1234-5678";
  our $coden = "CODEN";
  our $batchId="ltx2crossref$$";
@@ -219,7 +219,7 @@ sub PrintHead {
     # have them.
     my $indent = "        ";
     my $coden_out = $coden ne "CODEN" ? "\n$indent<coden>$coden</coden>" : "";
-    my $abbrev_title_out = $abbrevTitle ne "ABBR. Title."
+    my $abbrev_title_out = $abbrevTitle ne "ABBR. TTL."
         ? "\n$indent<abbrev_title>$abbrevTitle</abbrev_title>"
         : "";
 
