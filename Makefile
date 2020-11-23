@@ -1,10 +1,10 @@
-# Makefile for the (La0TeX crossrefware package. Public domain.
+# Makefile for the (La)TeX crossrefware package. Public domain.
 
 SCRIPTS = \
 	ltx2crossrefxml.pl \
 	bibdoiadd.pl \
-	bibzbladd.pl \
 	bibmradd.pl \
+	bibzbladd.pl \
 	biburl2doi.pl \
 	bbl2bib.pl
 
@@ -42,4 +42,7 @@ crossrefware.tex: ${SCRIPTS}
 	pod2latex -modify -full -prefile head.ltx -out $@ $+
 
 archive: all clean
-	COPYFILE_DISABLE=1 tar -C .. -czvf ../$(PACKAGE).tgz --exclude '*~' --exclude '*.tgz' --exclude '*.zip'  --exclude CVS --exclude '.git*' $(PACKAGE); mv ../$(PACKAGE).tgz .
+	COPYFILE_DISABLE=1 tar -C .. -czvf ../$(PACKAGE).tgz --exclude '*~' \
+	  --exclude '*.tgz' --exclude '*.zip'  --exclude CVS \
+	  --exclude '.git*' $(PACKAGE)
+	mv ../$(PACKAGE).tgz .
