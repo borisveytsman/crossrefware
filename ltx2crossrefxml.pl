@@ -4,12 +4,11 @@
 
 =head1 NAME
 
-ltx2crossrefxml.pl - a tool for creation of XML files for submitting to crossref.
+ltx2crossrefxml.pl - create XML files for submitting to crossref.org
 
 =head1 SYNOPSIS
 
-ltx2crossrefxml [B<-c> I<config_file>]  [B<-o> I<output>] I<latex_file> I<latex_file> ...
-
+ltx2crossrefxml [B<-c> I<config_file>]  [B<-o> I<output_file>] I<latex_file1> I<latex_file2> ...
 
 =head1 OPTIONS
 
@@ -17,25 +16,29 @@ ltx2crossrefxml [B<-c> I<config_file>]  [B<-o> I<output>] I<latex_file> I<latex_
 
 =item B<-c> I<config_file>
 
-Configuration file.  If this file is absent, some defaults are used.
+Configuration file.  If this file is absent, defaults are used.
 See below for its format.
 
-
-=item B<-o> I<output>
+=item B<-o> I<output_file>
 
 Output file.  If this option is not used, the XML is output to stdout.
 
 =back
 
+The usual C<--help> and C<--version> options are also supported.
+
 =head1 DESCRIPTION
 
-The script takes a number of latex files and produces an XML file
-ready for submission to Crossref.  Each file must be previously processed
-by LaTeX with the newest C<resphilosophica> package: the package creates
-the file C<.rti> wtih the information about the bibliography.
+For each given I<latex_file>, this script reads C<.bbl> and C<.rpi>
+files, representing bibliographic information, and outputs corresponding
+XML that can be uploaded to Crossref (L<https://crossref.org>).
 
-The processing of reference list is at present rather limited: only so
-called unstructured references are produced.
+The C<.rpi> files are output by the C<resphilosophica> package
+(L<https://ctan.org/pkg/resphilosophica>). They can also be created by
+hand.
+
+The processing of the reference list is at present rather limited: only
+so-called unstructured references are produced for Crossref.
 
 =head1 CONFIGURATION FILE FORMAT
 
@@ -66,6 +69,7 @@ extent permitted by law.
 =cut
 
  use strict;
+ use warnings;
 
  BEGIN {
      # find files relative to our installed location within TeX Live
@@ -80,13 +84,24 @@ extent permitted by law.
  use LaTeX::ToUnicode qw (convert);
  use File::Basename;
  use File::Spec;
- my $USAGE="USAGE: $0 [-c config] [-o output] file1 file2 ...\n";
-my $VERSION = <<END;
-ltx2crossrefxml v2.2
-This is free software.  You may redistribute copies of it under the
-terms of the GNU General Public License
-http://www.gnu.org/licenses/gpl.html.  There is NO WARRANTY, to the
-extent permitted by law.
+ my $USAGE=<<END;
+Usage: $0 [-c config] [-o output] file1 file2 ...\n";
+
+Convert .bbl and .rpi files to xml, for submitting to crossref.org.
+The .rpi files are output by the resphilosophica LaTeX, or can be
+created by hand.
+
+Development sources, bug tracker: https://github.com/borisveytsman/crossrefware
+Releases: https://ctan.org/pkg/crossrefware
+END
+
+ my $VERSION = <<END;
+ltx2crossrefxml (crossrefware) 2.3
+This is free software: you are free to change and redistribute it, under
+the terms of the GNU General Public License
+http://www.gnu.org/licenses/gpl.html (any version).
+There is NO WARRANTY, to the extent permitted by law.
+
 $USAGE
 END
  use Getopt::Std;
@@ -170,7 +185,7 @@ sub PrintHead {
 
 
     print OUT <<END;
-<doi_batch xmlns="http://www.crossref.org/schema/4.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.3.0" xsi:schemaLocation="http://www.crossref.org/schema/4.3.0 http://www.crossref.org/schema/deposit/crossref4.3.0.xsd">
+<doi_batch xmlns="http://www.crossref.org/schema/4.3.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.3.8" xsi:schemaLocation="http://www.crossref.org/schema/4.3.8 http://www.crossref.org/schema/deposit/crossref4.3.8.xsd">
   <head>
     <doi_batch_id>$batchId</doi_batch_id>
     <timestamp>$timestamp</timestamp>
