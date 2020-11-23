@@ -112,12 +112,12 @@ extent permitted by law.
  use LaTeX::ToUnicode qw (convert);
  use File::Basename;
  use File::Spec;
- my $USAGE=<<END;
-Usage: $0 [-c config] [-o output] file1 file2 ...\n";
+ my $USAGE = <<END;
+Usage: $0 [-c config] [-o output] ltxfile1 ltxfile2 ...
 
-Convert .bbl and .rpi files to xml, for submitting to crossref.org.
-The .rpi files are output by the resphilosophica LaTeX, or can be
-created by hand.
+Convert .rpi and (if it exists) .bbl files to xml, for submitting to
+crossref.org. The .rpi files are output by the resphilosophica LaTeX
+package, or can be created by hand.
 
 Development sources, bug tracker: https://github.com/borisveytsman/crossrefware
 Releases: https://ctan.org/pkg/crossrefware
@@ -130,18 +130,22 @@ the terms of the GNU General Public License
 http://www.gnu.org/licenses/gpl.html (any version).
 There is NO WARRANTY, to the extent permitted by law.
 
-$USAGE
+Written by Boris Veytsman.
 END
- use Getopt::Std;
+ use Getopt::Long;
  my %opts;
- getopts('c:o:hV',\%opts) or die $USAGE;
+
+ GetOptions(
+   "config|c=s" => \($opts{c}),
+   "output|o=s" => \($opts{o}),
+   "version|V"  => \($opts{V}),
+   "help|?"     => \($opts{h})) || pod2usage(1);
+
+ if ($opts{h}) { print $USAGE; exit 0; } 
+ if ($opts{V}) { print $VERSION; exit 0; } 
+
  use utf8;
  binmode(STDOUT, ":utf8");
-
-if ($opts{h} || $opts{V}){
-    print $VERSION;
-    exit 0;
-}
 
  ################################################################
  # Defaults and parameters
@@ -150,7 +154,7 @@ if ($opts{h} || $opts{V}){
  *OUT=*STDOUT;
  
  if (defined($opts{o})) {
-     open (OUT, ">$opts{o}") or die "Cannot open file $opts{o} for writing\n";
+     open (OUT, ">$opts{o}") or die "open($opts{o}) for writing failed: $!\n";
      binmode(OUT, ":utf8")
  }
 
@@ -170,7 +174,7 @@ if ($opts{h} || $opts{V}){
      if (-r $opts{c}) {
 	 require $opts{c};
      } else {
-	 die "Cannot read options $opts{c}.  $USAGE";
+	 die "Cannot read config file $opts{c}. Goodbye.";
      }
  }
 

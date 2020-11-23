@@ -17,11 +17,12 @@ PDF = crossrefware.pdf
 all:  ${MAN1} ${PDF}
 	chmod a+x ${SCRIPTS}
 
-
+check:
+	./ltx2crossrefxml.pl --help
+	./ltx2crossrefxml.pl --version
 
 %.1: %.pl
 	pod2man -c "LATEX CROSSREFWARE" -n $* -s 1 -r "" $< > $@
-
 
 
 clean:
