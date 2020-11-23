@@ -183,6 +183,13 @@ if ($opts{h} || $opts{V}){
 
 sub PrintHead {
 
+    # do not output the <coden> or <abbrev_title> if the journal doesn't
+    # have them.
+    my $indent = "        ";
+    my $coden_out = $coden ne "CODEN" ? "\n$indent<coden>$coden</coden>" : "";
+    my $abbrev_title_out = $abbrevTitle ne "ABBR. Title."
+        ? "\n$indent<abbrev_title>$abbrevTitle</abbrev_title>"
+        : "";
 
     print OUT <<END;
 <doi_batch xmlns="http://www.crossref.org/schema/4.3.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.3.8" xsi:schemaLocation="http://www.crossref.org/schema/4.3.8 http://www.crossref.org/schema/deposit/crossref4.3.8.xsd">
@@ -198,10 +205,8 @@ sub PrintHead {
   <body>
     <journal>
       <journal_metadata language="en">
-        <full_title>$fullTitle</full_title>
-        <abbrev_title>$abbrevTitle</abbrev_title>
-	<issn>$issn</issn>
-	<coden>$coden</coden>
+        <full_title>$fullTitle</full_title>$abbrev_title_out
+	<issn>$issn</issn>$coden_out	
       </journal_metadata>
 END
 
