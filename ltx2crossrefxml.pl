@@ -166,8 +166,11 @@ END
  our $abbrevTitle = "ABBR. TTL.";
  our $issn = "1234-5678";
  our $coden = "CODEN";
- our $batchId="ltx2crossref$$";
  our $timestamp=strftime("%Y%m%d%H%M%S", gmtime);
+ # use timestamp in batchid, since the value is supposed to be unique
+ # for every submission to crossref by a given publisher.
+ # https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#doi_batch_id
+ our $batchId="ltx2crossref-$timestamp-$$";
 
 
  if ($opts{c}) {
@@ -214,7 +217,6 @@ END
 #####################################################
 
 sub PrintHead {
-
     # do not output the <coden> or <abbrev_title> if the journal doesn't
     # have them.
     my $indent = "        ";
