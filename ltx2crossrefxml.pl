@@ -29,16 +29,21 @@ The usual C<--help> and C<--version> options are also supported.
 
 =head1 DESCRIPTION
 
-For each given I<latex_file>, this script reads C<.bbl> and C<.rpi>
-files, representing bibliographic information, and outputs corresponding
-XML that can be uploaded to Crossref (L<https://crossref.org>).
+For each given I<latex_file>, this script reads C<.rpi> and (if it
+exists) C<.bbl> files, representing bibliographic information, and
+outputs corresponding XML that can be uploaded to Crossref
+(L<https://crossref.org>).
 
 These C<.rpi> files are output by the C<resphilosophica> package
 (L<https://ctan.org/pkg/resphilosophica>). They can also be created by
-hand; they describe each reference in the bibliography.
+hand or by whatever other method you implement; they describe each
+reference in the bibliography. An example is below.
 
 The processing of the reference list is at present rather limited: only
 so-called unstructured references are produced for Crossref.
+
+This script just writes an XML file. It's up to you to actually do the
+uploading to Crossref.
 
 =head1 CONFIGURATION FILE FORMAT
 
@@ -46,6 +51,29 @@ The configuration file is mostly self-explanatory: it has comments
 (starting with C<#>) and assignments in the form
 
    $field = value ;
+
+The idea is to specify the user-specific and journal-specific values
+needed for the Crossref upload.
+
+=head1 RPI FILE FORMAT
+
+Here's the C<.rpi> file created from the C<rpsample.tex> example in the
+resphilosophica package (all the data is fake, of course):
+
+  \relax 
+  \articleentry{Boris Veytsman\and A. U. Th{\o }r\and C. O. R\"espondent}{A Sample Paper:\\ \emph  {A Template}}{1}{1}
+  %authors=Boris Veytsman\and A. U. Th{\o }r\and C. O. R\"espondent
+  %title=A Sample Paper:\\ \emph  {A Template}
+  %year=2012
+  %volume=90
+  %issue=1--2
+  %paper=2
+  %startpage=1
+  %endpage=1
+  %doi=10.11612/resphil.A31245
+  %paperUrl=http://borisv.lk.net/paper12
+
+For more details on processing, see the code.
 
 =head1 EXAMPLES
 
@@ -55,7 +83,7 @@ The configuration file is mostly self-explanatory: it has comments
 
 =head1 AUTHOR
 
-Boris Veytsman
+Boris Veytsman L<https://github.com/borisveytsman/crossrefware>
 
 =head1 COPYRIGHT AND LICENSE
 

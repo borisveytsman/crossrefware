@@ -16,13 +16,17 @@ These scripts can be used to create files for submission to Crossref,
 check and add doi numbers, MathSciNet numbers and ZbMath numbers to
 papers, and to convert `bbl' files to `bib' files.
 
-I am grateful to Josko Plazonic from Princeton Math Dept whose
-(unpublished) Python script was an inspiration for this suite.
+Development sources and issue tracker are on github:
+\url{https://github.com/borisveytsman/crossrefware}.
+Releases are made on CTAN:
+\url{https://ctan.org/pkg/crossrefware}
+and from there included in \TeX\ Live and other distributions.
 
-The script \path{ltx2crossrefxml} is used to extract the information
-from \path{.bbl} and \path{.rpi} files and generate an XML file suitable
-for submission to crossref.org. (Crossref is the organization that
-handles DOI numbers for scholarly papers.)
+The script \path{ltx2crossrefxml} extracts information from an
+\path{.rpi} files and (if it exists) \path{.bbl} files and generates an
+XML file suitable for submission to crossref.org. (Crossref is the
+organization that handles DOI numbers for scholarly papers.) It does not
+actually do the submission, just generates the XML.
 
 This \path{.rpi} file is written by the \path{resphilosophica} package
 (\url{https://ctan.org/pkg/resphilosophica}). It can also be created by
@@ -38,5 +42,8 @@ corresponding \path{thebibliography} environment.  One can argue that
 this operation is akin to reconstructing the cow from a steak.  The
 way the script does it is by searching for the entry in the MR database,
 and creating the corresponding Bib\TeX\ fields.
+
+I am grateful to Josko Plazonic from Princeton Math Dept whose
+(unpublished) Python script was an inspiration for this suite.
 
 Following are manual pages for these scripts.  
