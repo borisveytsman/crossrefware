@@ -56,13 +56,12 @@ Boris Veytsman
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2016  Boris Veytsman
+Copyright 2012-2020 Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
 L<http://www.gnu.org/licenses/gpl.html>.  There is NO WARRANTY, to the
 extent permitted by law.
-
 
 =cut
 
@@ -74,6 +73,7 @@ extent permitted by law.
      if (length($TLMaster)) {
 	 unshift @INC, "$TLMaster/texmf-dist/scripts/bibtexperllibs";
      }
+     unshift @INC, "."; # since the config file is probably in the cwd
  }
  use POSIX qw(strftime);
  use BibTeX::Parser::Author;
