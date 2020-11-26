@@ -35,26 +35,30 @@ to Crossref (L<https://crossref.org>). The extension of I<latex_file> is
 ignored, and I<latex_file> itself is not read (and need not even exist).
 
 Each C<.rpi> file specifies the metadata for a single article to be
-uploaded to Crossref (a C<journal_article> element); an example is
-below. Each C<.rpi> must contain information for only one article, but
-multiple files can be read in a single run. These files are output by
-the C<resphilosophica> package
+uploaded to Crossref (a C<journal_article> element in their schema); an
+example is below. Each C<.rpi> must contain information for only one
+article, but multiple files can be read in a single run. These files are
+output by the C<resphilosophica> package
 (L<https://ctan.org/pkg/resphilosophica>), but (as always) can also be
 created by hand or by whatever other method you implement.
 
 The C<.bbl> files are used for creating the C<citation_list> element in
-the metadata. If no C<.bbl> files exists for a given C<.rpi>, no
-C<citation_list> is output. The processing is rudimentary: only
-so-called C<unstructured_citation> references are produced for Crossref,
-that is, the contents of the citation (each paragraph in the C<.bbl>) is
-dumped as a single string.
+the metadata. The processing is rudimentary: only so-called
+C<unstructured_citation> references are produced for Crossref, that is,
+the contents of the citation (each paragraph in the C<.bbl>) is dumped
+as a single string. If no C<.bbl> files exists for a given C<.rpi>, no
+C<citation_list> is output. (The companion C<bbl2bib> program attempts
+to reconstruct a C<.bib> file from a C<.bbl>, if the papers can be found
+in the MR database.)
 
 For all text, TeX control sequences are replaced with plain text or
-UTF-8 or eliminated, as appropriate.
+UTF-8 or eliminated, as appropriate.  The C<LaTeX::ToUnicode::convert>
+routine is used for this (L<https://ctan.org/pkg/bibtexperllibs>).
 
 This script just writes an XML file. It's up to you to actually do the
-uploading to Crossref; using, for example, their Java tool <a
-href="https://www.crossref.org/education/member-setup/direct-deposit-xml/https-post">crossref-upload-tool.jar</a>.
+uploading to Crossref. For example, using their Java tool 
+C<crossref-upload-tool.jar>
+(L<https://www.crossref.org/education/member-setup/direct-deposit-xml/https-post>).
 
 =head1 CONFIGURATION FILE FORMAT
 
@@ -73,8 +77,9 @@ is written as C<journal_issue> plus C<journal_article> elements.
 
 =head1 RPI FILE FORMAT
 
-Here's the C<.rpi> file created from the C<rpsample.tex> example in the
-resphilosophica package (all the data is fake, of course):
+Here's the (relevant part of the) C<.rpi> file created from the
+C<rpsample.tex> example in the resphilosophica package (all the data is
+fake, of course):
 
   %authors=Boris Veytsman\and A. U. Th{\o }r\and C. O. R\"espondent
   %title=A Sample Paper:\\ \emph  {A Template}
@@ -88,6 +93,18 @@ resphilosophica package (all the data is fake, of course):
 
 Other lines, some not beginning with %, are ignored (and not shown).
 For more details on processing, see the code.
+
+The C<%paperUrl> value is what will be associated with the given C<%doi>
+(output as the C<resource> element). Crossref strongly recommends that
+the url be for a so-called landing page, and not a PDF
+(L<https://www.crossref.org/education/member-setup/creating-a-landing-page/>).
+If the url is not specified, a special-purpose lookup is done for
+I<S<Res Philosophica>> journal.
+
+The C<%authors> field is split at C<\and> (ignoring whitespace before
+and after), and output as the C<contributors> element, using
+C<sequence="first"> for the first listed, C<sequence="additional"> for
+the remainder.
 
 =head1 EXAMPLES
 
@@ -121,6 +138,7 @@ extent permitted by law.
      }
      unshift @INC, "."; # since the config file is probably in the cwd
  }
+
  use POSIX qw(strftime);
  use BibTeX::Parser::Author;
  use LaTeX::ToUnicode qw (convert);
@@ -130,7 +148,8 @@ extent permitted by law.
 Usage: $0 [-c config] [-o output] ltxfile1 ltxfile2 ...
 
 Convert .rpi and (if any are present) .bbl files to xml, for submitting
-to crossref.org. The .rpi files are output by the resphilosophica LaTeX
+to crossref.org. The .rpi files are plain text, with values on lines
+beginning with %. They are output by the resphilosophica LaTeX
 package, or can be created by hand.
 
 Development sources, bug tracker: https://github.com/borisveytsman/crossrefware
@@ -216,11 +235,9 @@ END
 	     }
 	 }
      }
-
  }
 
  PrintTail();
-
  exit(0);
 
 
@@ -258,7 +275,6 @@ sub PrintHead {
 	<issn>$issn</issn>$coden_out	
       </journal_metadata>
 END
-
 }
 
 sub PrintTail {
@@ -268,7 +284,7 @@ sub PrintTail {
 </doi_batch>
 END
 
-return;
+    return;
 }
 
 
@@ -285,6 +301,11 @@ sub AddPaper {
     while (<RPI>) {
 	chomp;
         if (/^%([^=]*)\s*=\s*(.*)\s*$/) {
+           if (exists $data{$1}) {
+             warn "$rpifile:$.: already saw data{$1}=$data{$1};"
+                  . " an .rpi file should have data for only one article,"
+                  . " but overwriting with `$2' anyway.\n";
+           }
            $data{$1}=$2;
         }
     }
@@ -388,7 +409,6 @@ $seq='additional';
 	print OUT <<END;
           </person_name>
 END
-
     }
 
     print OUT <<END;
@@ -417,13 +437,11 @@ END
     print OUT <<END;
         </citation_list>
 END
-}
+    }
 
     print OUT <<END;
       </journal_article>
 END
-
-
 }
 
 
@@ -465,7 +483,6 @@ sub PrintAuthor {
 	print OUT <<END;
             <given_name>$line</given_name>
 END
-
     }
 
     if ($person->last) {
@@ -476,7 +493,6 @@ END
 	print OUT <<END;
             <surname>$line</surname>
 END
-
     }
 
     if ($person->jr) {
@@ -484,9 +500,7 @@ END
 	print OUT <<END;
             <suffix>$line</suffix>
 END
-
     }
-
 }
 
 #############################################################
@@ -505,8 +519,7 @@ sub PrintCitation {
              </unstructured_citation>
           </citation>
 END
-}
-
+    }
 }
 
 ##############################################################
