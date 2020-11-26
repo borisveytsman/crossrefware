@@ -29,50 +29,64 @@ The usual C<--help> and C<--version> options are also supported.
 
 =head1 DESCRIPTION
 
-For each given I<latex_file>, this script reads C<.rpi> and (if it
-exists) C<.bbl> files, representing bibliographic information, and
-outputs corresponding XML that can be uploaded to Crossref
-(L<https://crossref.org>).
+For each given I<latex_file>, this script reads C<.rpi> and (if they
+exist) C<.bbl> files and outputs corresponding XML that can be uploaded
+to Crossref (L<https://crossref.org>). The extension of I<latex_file> is
+ignored, and I<latex_file> itself is not read (and need not even exist).
 
-These C<.rpi> files are output by the C<resphilosophica> package
-(L<https://ctan.org/pkg/resphilosophica>). They can also be created by
-hand or by whatever other method you implement; they describe each
-reference in the bibliography. An example is below.
+Each C<.rpi> file specifies the metadata for a single article to be
+uploaded to Crossref (a C<journal_article> element); an example is
+below. Each C<.rpi> must contain information for only one article, but
+multiple files can be read in a single run. These files are output by
+the C<resphilosophica> package
+(L<https://ctan.org/pkg/resphilosophica>), but (as always) can also be
+created by hand or by whatever other method you implement.
 
-The processing of the reference list is at present rather limited: only
-so-called unstructured references are produced for Crossref.
+The C<.bbl> files are used for creating the C<citation_list> element in
+the metadata. If no C<.bbl> files exists for a given C<.rpi>, no
+C<citation_list> is output. The processing is rudimentary: only
+so-called C<unstructured_citation> references are produced for Crossref,
+that is, the contents of the citation (each paragraph in the C<.bbl>) is
+dumped as a single string.
+
+For all text, TeX control sequences are replaced with plain text or
+UTF-8 or eliminated, as appropriate.
 
 This script just writes an XML file. It's up to you to actually do the
-uploading to Crossref.
+uploading to Crossref; using, for example, their Java tool <a
+href="https://www.crossref.org/education/member-setup/direct-deposit-xml/https-post">crossref-upload-tool.jar</a>.
 
 =head1 CONFIGURATION FILE FORMAT
 
-The configuration file is mostly self-explanatory: it has comments
-(starting with C<#>) and assignments in the form
+The configuration file has comments (starting with C<#>) and assignments
+in the form
 
    $field = value ;
 
 The idea is to specify the user-specific and journal-specific values
 needed for the Crossref upload.
 
+For a given run, all C<.rpi> data is assumed to belong to the journal
+that is specified in the configuration file. That is, the configuration
+data is written as a C<journal_metadata> element, and then each C<.rpi>
+is written as C<journal_issue> plus C<journal_article> elements.
+
 =head1 RPI FILE FORMAT
 
 Here's the C<.rpi> file created from the C<rpsample.tex> example in the
 resphilosophica package (all the data is fake, of course):
 
-  \relax 
-  \articleentry{Boris Veytsman\and A. U. Th{\o }r\and C. O. R\"espondent}{A Sample Paper:\\ \emph  {A Template}}{1}{1}
   %authors=Boris Veytsman\and A. U. Th{\o }r\and C. O. R\"espondent
   %title=A Sample Paper:\\ \emph  {A Template}
   %year=2012
   %volume=90
   %issue=1--2
-  %paper=2
   %startpage=1
   %endpage=1
   %doi=10.11612/resphil.A31245
   %paperUrl=http://borisv.lk.net/paper12
 
+Other lines, some not beginning with %, are ignored (and not shown).
 For more details on processing, see the code.
 
 =head1 EXAMPLES
@@ -115,8 +129,8 @@ extent permitted by law.
  my $USAGE = <<END;
 Usage: $0 [-c config] [-o output] ltxfile1 ltxfile2 ...
 
-Convert .rpi and (if it exists) .bbl files to xml, for submitting to
-crossref.org. The .rpi files are output by the resphilosophica LaTeX
+Convert .rpi and (if any are present) .bbl files to xml, for submitting
+to crossref.org. The .rpi files are output by the resphilosophica LaTeX
 package, or can be created by hand.
 
 Development sources, bug tracker: https://github.com/borisveytsman/crossrefware
@@ -159,9 +173,9 @@ END
  }
 
 
- our $depositorName='DEPOSITOR_NAME';
- our $depositorEmail='DEPOSITOR_EMAIL';
- our $registrant='REGISTRANT';
+ our $depositorName = 'DEPOSITOR_NAME';
+ our $depositorEmail = 'DEPOSITOR_EMAIL';
+ our $registrant = 'REGISTRANT';
  our $fullTitle = "FULL TITLE";
  our $abbrevTitle = "ABBR. TTL.";
  our $issn = "1234-5678";
@@ -180,8 +194,6 @@ END
 	 die "Cannot read config file $opts{c}. Goodbye.";
      }
  }
-
-
 
  PrintHead();
 
@@ -215,7 +227,6 @@ END
 #####################################################
 #  Printing the head and the tail
 #####################################################
-
 sub PrintHead {
     # do not output the <coden> or <abbrev_title> if the journal doesn't
     # have them.
@@ -264,7 +275,6 @@ return;
 #######################################################
 #  Adding one paper
 #######################################################
-
 sub AddPaper {
     my $file = shift;
     my ($name,$path,$suffix) = fileparse($file, '\.[^\.]*$');
@@ -336,7 +346,6 @@ sub AddBibliography {
 #################################################################
 #  Printing information about one issue
 #################################################################
-
 sub PrintIssueHead {
     my ($year, $volume, $issue) = @_;
     print OUT <<END;
@@ -357,7 +366,7 @@ END
 ###############################################################
 sub PrintPaper {
     my $paper = shift;
-    my $title=convert($paper->{title});
+    my $title=LaTeX::ToUnicode::convert($paper->{title});
     my $url=GetURL($paper);
     print OUT <<END;
       <journal_article publication_type="full_text">
@@ -423,7 +432,7 @@ END
 ###############################################################
 sub SanitizeText {
     my $string = shift;
-    $string = convert($string);
+    $string = LaTeX::ToUnicode::convert($string);
     $string =~ s/\\newblock//g;
     $string =~ s/\\bgroup//g;
     $string =~ s/\\egroup//g;
@@ -503,7 +512,6 @@ END
 ##############################################################
 #  Calculating URL
 ##############################################################
-
 sub GetURL {
     my $paper = shift;
 
