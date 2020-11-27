@@ -387,14 +387,12 @@ END
 ###############################################################
 sub PrintPaper {
     my $paper = shift;
-    my $title=LaTeX::ToUnicode::convert($paper->{title});
+    my $title=SanitizeText($paper->{title});
     my $url=GetURL($paper);
     print OUT <<END;
       <journal_article publication_type="full_text">
         <titles>
-           <title>
-             $title
-           </title>
+           <title>$title</title>
         </titles>
         <contributors>
 END
@@ -451,21 +449,24 @@ END
 sub SanitizeText {
     my $string = shift;
     $string = LaTeX::ToUnicode::convert($string);
-    $string =~ s/\\newblock//g;
-    $string =~ s/\\bgroup//g;
-    $string =~ s/\\egroup//g;
-    $string =~ s/\\scshape//g;
-    $string =~ s/\\urlprefix//g;
-    $string =~ s/\\emph//g;
-    $string =~ s/\\textbf//g;
-    $string =~ s/\\enquote//g;
-    $string =~ s/\\url/URL: /g;
-    $string =~ s/\\doi/DOI: /g;
+    $string =~ s/\\newblock\b\s*//g;
+    $string =~ s/\\bgroup\b\s*//g;
+    $string =~ s/\\egroup\b\s*//g;
+    $string =~ s/\\scshape\b\s*//g;
+    $string =~ s/\\urlprefix\b\s*//g;
+    $string =~ s/\\emph\b\s*//g;
+    $string =~ s/\\textbf\b\s*//g;
+    $string =~ s/\\enquote\b\s*//g;
+    $string =~ s/\\url\b\s*/URL: /g;
+    $string =~ s/\\doi\b\s*/DOI: /g;
     $string =~ s/\\\\/ /g;
     $string =~ s/\$//g;
     $string =~ s/\\checkcomma/,/g;
     $string =~ s/~/ /g;
-    $string =~ s/[\{\}]//g;
+    $string =~ s/[{}]//g;
+    $string =~ s/^\s+//; # remove leading whitespace
+    $string =~ s/\s+$//; # remove trailing whitespace
+    $string =~ s/\s+/ /; # collapse all remaining whitespace to one space
     return $string;
 }
 
