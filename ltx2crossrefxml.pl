@@ -8,7 +8,8 @@ ltx2crossrefxml.pl - create XML files for submitting to crossref.org
 
 =head1 SYNOPSIS
 
-ltx2crossrefxml [B<-c> I<config_file>]  [B<-o> I<output_file>] I<latex_file1> I<latex_file2> ...
+ltx2crossrefxml [B<-c> I<config_file>]  [B<-o> I<output_file>] [B<-xml-input>]
+                I<latex_file1> I<latex_file2> ...
 
 =head1 OPTIONS
 
@@ -23,6 +24,10 @@ See below for its format.
 
 Output file.  If this option is not used, the XML is output to stdout.
 
+=item B<-xml-input>
+
+Do not transform author and title input strings, assume they are valid XML.
+
 =back
 
 The usual C<--help> and C<--version> options are also supported.
@@ -36,24 +41,26 @@ ignored, and I<latex_file> itself is not read (and need not even exist).
 
 Each C<.rpi> file specifies the metadata for a single article to be
 uploaded to Crossref (a C<journal_article> element in their schema); an
-example is below. Each C<.rpi> must contain information for only one
-article, but multiple files can be read in a single run. These files are
-output by the C<resphilosophica> package
-(L<https://ctan.org/pkg/resphilosophica>), but (as always) can also be
-created by hand or by whatever other method you implement.
+example is below. These files are output by the C<resphilosophica>
+package (L<https://ctan.org/pkg/resphilosophica>), but (as always) can
+also be created by hand or by whatever other method you implement.
 
 The C<.bbl> files are used for creating the C<citation_list> element in
 the metadata. The processing is rudimentary: only so-called
 C<unstructured_citation> references are produced for Crossref, that is,
 the contents of the citation (each paragraph in the C<.bbl>) is dumped
-as a single string. If no C<.bbl> files exists for a given C<.rpi>, no
-C<citation_list> is output. (The companion C<bbl2bib> program attempts
-to reconstruct a C<.bib> file from a C<.bbl>, if the papers can be found
-in the MR database.)
+as a single flat string. If no C<.bbl> file exists for a given C<.rpi>,
+no C<citation_list> is output. (By the way, the companion C<bbl2bib>
+program attempts to reconstruct a C<.bib> file from a C<.bbl>, if the
+papers can be found in the MR database.)
 
-For all text, TeX control sequences are replaced with plain text or
-UTF-8 or eliminated, as appropriate.  The C<LaTeX::ToUnicode::convert>
+Unless C<--xml-input> is specified, for all text (authors, title,
+citations), standard TeX control sequences are replaced with plain text
+or UTF-8 or eliminated, as appropriate. The C<LaTeX::ToUnicode::convert>
 routine is used for this (L<https://ctan.org/pkg/bibtexperllibs>).
+Tricky TeX control sequences will almost surely not be handled
+correctly. If C<--xml-input> is given, the strings are output as-is,
+assuming they are valid XML; no checking is done.
 
 This script just writes an XML file. It's up to you to actually do the
 uploading to Crossref. For example, using their Java tool 
@@ -106,6 +113,12 @@ and after), and output as the C<contributors> element, using
 C<sequence="first"> for the first listed, C<sequence="additional"> for
 the remainder.
 
+Each C<.rpi> must contain information for only one article, but multiple
+files can be read in a single run. It would not be difficult to support
+multiple articles in a single C<.rpi> file, but it makes debugging and
+error correction easier when each uploaded XML contains a single
+article.
+
 =head1 EXAMPLES
 
   ltx2crossrefxml.pl ../paper1/paper1.tex ../paper2/paper2.tex -o result.xml
@@ -122,7 +135,7 @@ Copyright 2012-2020 Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
-L<http://www.gnu.org/licenses/gpl.html>.  There is NO WARRANTY, to the
+L<https://www.gnu.org/licenses/gpl.html>.  There is NO WARRANTY, to the
 extent permitted by law.
 
 =cut
@@ -171,6 +184,7 @@ END
  GetOptions(
    "config|c=s" => \($opts{c}),
    "output|o=s" => \($opts{o}),
+   "xml-input!" => \($opts{xi}),
    "version|V"  => \($opts{V}),
    "help|?"     => \($opts{h})) || pod2usage(1);
 
@@ -444,10 +458,11 @@ END
 
 
 ###############################################################
-#  Sanitization of a text string
+#  Sanitization of a text string, no-op if --xml-input was given
 ###############################################################
 sub SanitizeText {
     my $string = shift;
+    return $string if $opts{xi}; # do nothing with --xml-input
     $string = LaTeX::ToUnicode::convert($string);
     $string =~ s/\\newblock\b\s*//g;
     $string =~ s/\\bgroup\b\s*//g;
@@ -460,8 +475,9 @@ sub SanitizeText {
     $string =~ s/\\url\b\s*/URL: /g;
     $string =~ s/\\doi\b\s*/DOI: /g;
     $string =~ s/\\\\/ /g;
-    $string =~ s/\$//g;
     $string =~ s/\\checkcomma/,/g;
+    $string =~ s/\$//g;
+    $string =~ s/\&/&amp;/g;
     $string =~ s/~/ /g;
     $string =~ s/[{}]//g;
     $string =~ s/^\s+//; # remove leading whitespace
