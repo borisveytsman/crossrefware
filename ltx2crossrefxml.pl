@@ -8,7 +8,7 @@ ltx2crossrefxml.pl - create XML files for submitting to crossref.org
 
 =head1 SYNOPSIS
 
-ltx2crossrefxml [B<-c> I<config_file>]  [B<-o> I<output_file>] [B<-xml-input>]
+ltx2crossrefxml [B<-c> I<config_file>]  [B<-o> I<output_file>] [B<-input-is-xml>]
                 I<latex_file1> I<latex_file2> ...
 
 =head1 OPTIONS
@@ -24,7 +24,7 @@ See below for its format.
 
 Output file.  If this option is not used, the XML is output to stdout.
 
-=item B<-xml-input>
+=item B<-input-is-xml>
 
 Do not transform author and title input strings, assume they are valid XML.
 
@@ -54,33 +54,40 @@ no C<citation_list> is output. (By the way, the companion C<bbl2bib>
 program attempts to reconstruct a C<.bib> file from a C<.bbl>, if the
 papers can be found in the MR database.)
 
-Unless C<--xml-input> is specified, for all text (authors, title,
+Unless C<--input-is-xml> is specified, for all text (authors, title,
 citations), standard TeX control sequences are replaced with plain text
 or UTF-8 or eliminated, as appropriate. The C<LaTeX::ToUnicode::convert>
 routine is used for this (L<https://ctan.org/pkg/bibtexperllibs>).
 Tricky TeX control sequences will almost surely not be handled
-correctly. If C<--xml-input> is given, the strings are output as-is,
+correctly. If C<--input-is-xml> is given, the strings are output as-is,
 assuming they are valid XML; no checking is done.
 
 This script just writes an XML file. It's up to you to actually do the
 uploading to Crossref. For example, using their Java tool 
 C<crossref-upload-tool.jar>
 (L<https://www.crossref.org/education/member-setup/direct-deposit-xml/https-post>).
+For the definition of their schema, see
+L<https://data.crossref.org/reports/help/schema_doc/4.4.2/index.html>
+(this is the schema version currently followed by this script).
 
 =head1 CONFIGURATION FILE FORMAT
 
-The configuration file has comments (starting with C<#>) and assignments
-in the form
+The configuration file ignores comment lines starting with C<#> and
+blank lines. The other lines should be assignments in the form (spaces
+are optional):
 
    $field = value ;
 
-The idea is to specify the user-specific and journal-specific values
-needed for the Crossref upload.
+Usually the value is a C<"string"> enclosed in ASCII double-quote
+characters (the file is processed by Perl). The idea is to specify the
+user-specific and journal-specific values needed for the Crossref
+upload.
 
-For a given run, all C<.rpi> data is assumed to belong to the journal
-that is specified in the configuration file. That is, the configuration
-data is written as a C<journal_metadata> element, and then each C<.rpi>
-is written as C<journal_issue> plus C<journal_article> elements.
+For a given run, all C<.rpi> data read is assumed to belong to the
+journal that is specified in the configuration file. More precisely, the
+configuration data is written as a C<journal_metadata> element, and then
+each C<.rpi> is written as C<journal_issue> plus C<journal_article>
+elements.
 
 =head1 RPI FILE FORMAT
 
@@ -184,7 +191,7 @@ END
  GetOptions(
    "config|c=s" => \($opts{c}),
    "output|o=s" => \($opts{o}),
-   "xml-input!" => \($opts{xi}),
+   "input-is-xml!" => \($opts{xi}),
    "version|V"  => \($opts{V}),
    "help|?"     => \($opts{h})) || pod2usage(1);
 
@@ -458,11 +465,11 @@ END
 
 
 ###############################################################
-#  Sanitization of a text string, no-op if --xml-input was given
+#  Sanitization of a text string, or no-op if --input-is-xml was given
 ###############################################################
 sub SanitizeText {
     my $string = shift;
-    return $string if $opts{xi}; # do nothing with --xml-input
+    return $string if $opts{xi}; # do nothing if --input-is-xml
     $string = LaTeX::ToUnicode::convert($string);
     $string =~ s/\\newblock\b\s*//g;
     $string =~ s/\\bgroup\b\s*//g;
