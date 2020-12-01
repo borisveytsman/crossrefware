@@ -165,12 +165,16 @@ extent permitted by law.
  use File::Basename;
  use File::Spec;
  my $USAGE = <<END;
-Usage: $0 [-c config] [-o output] ltxfile1 ltxfile2 ...
+Usage: $0 [-c CONFIG] [-o OUTPUT] LTXFILE1 LTXFILE2 ...
 
-Convert .rpi and (if any are present) .bbl files to xml, for submitting
-to crossref.org. The .rpi files are plain text, with values on lines
-beginning with %. They are output by the resphilosophica LaTeX
-package, or can be created by hand.
+Convert .rpi and (if any are present) .bbl files corresponding to each
+LTXFILE to xml, for submitting to crossref.org. The LTXFILE is not read
+(and need not even exist); any extension it has is replaced by .rpi and
+.bbl.
+
+The .rpi files are plain text, with values on lines beginning with %, as
+output by (for example) the resphilosophica LaTeX package. The .bbl
+files are as output by BibTeX. Both are also commonly created by hand.
 
 Development sources, bug tracker: https://github.com/borisveytsman/crossrefware
 Releases: https://ctan.org/pkg/crossrefware
@@ -316,8 +320,8 @@ sub AddPaper {
     my $file = shift;
     my ($name,$path,$suffix) = fileparse($file, '\.[^\.]*$');
     my $rpifile = File::Spec->catfile($path, "$name.rpi");
-    open (RPI, $rpifile) or die 
-     "Cannot find $rpifile.  Did you process $file?\n";
+    open (RPI, $rpifile)
+      or die "open($rpifile) failed: $! (did you process $file?)\n";
     my %data;
     while (<RPI>) {
 	chomp;
@@ -333,8 +337,7 @@ sub AddPaper {
     close RPI;
     my @bibliography;
     foreach my $bibfile ($file, File::Spec->catfile($path, "$name.bbl")) {
-         @bibliography = (@bibliography, 
-          AddBibliography($bibfile));
+         @bibliography = (@bibliography, AddBibliography($bibfile));
     }
     $data{'bibliography'}=\@bibliography;
     push @{$papers{$data{year}}->{$data{volume}}->{$data{issue}}}, \%data;
@@ -417,17 +420,17 @@ sub PrintPaper {
         </titles>
         <contributors>
 END
-my @authors = split /\s*\\and\s*/, $paper->{authors};
+    my @authors = split /\s*\\and\s*/, $paper->{authors};
     my $seq='first';
     foreach my $author (@authors) {
 	print OUT <<END;
           <person_name sequence="$seq" contributor_role="author">
 END
-$seq='additional';
 	PrintAuthor($author);
 	print OUT <<END;
           </person_name>
 END
+        $seq='additional';
     }
 
     print OUT <<END;
@@ -446,7 +449,7 @@ END
         </doi_data>
 END
 
-if (scalar(@{$paper->{bibliography}})) {
+    if (scalar(@{$paper->{bibliography}})) {
     print OUT <<END;
         <citation_list>
 END
