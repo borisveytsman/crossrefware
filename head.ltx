@@ -1,5 +1,5 @@
-\documentclass{article}
-\usepackage{makeidx}
+\documentclass[11pt]{article}
+\usepackage{makeidx,fullpage}
 \usepackage[hidelinks]{hyperref}
 \makeindex
 \begin{document}
@@ -22,16 +22,16 @@ Releases are made on CTAN:
 \url{https://ctan.org/pkg/crossrefware}
 and from there included in \TeX\ Live and other distributions.
 
-The script \path{ltx2crossrefxml} extracts information from an
-\path{.rpi} files and (if present) \path{.bbl} files and generates an
-XML file suitable for submission to crossref.org. (Crossref is the
-organization that handles DOI numbers for scholarly papers.) It does not
-actually upload the submission, just generates the XML file.
+The script \path{ltx2crossrefxml} extracts information from \path{.rpi}
+files and (if present) \path{.bbl} files and generates an XML file
+suitable for submission to crossref.org. (Crossref is the organization
+that handles DOI numbers for scholarly papers.) It does not actually
+upload the submission, just outputs XML.
 
 This \path{.rpi} file is a plain text representation of the metadata for
 one article. It is written by the \path{resphilosophica} package
 (\url{https://ctan.org/pkg/resphilosophica}). It can also be created by
-handle.
+hand.
 
 Several scripts, \path{bibdoiadd}, \path{bibmradd} and \path{bibzbladd}
 take a \path{bib} file, and add to each entry a DOI, MR or ZBL number

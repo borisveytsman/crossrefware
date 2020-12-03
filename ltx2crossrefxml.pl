@@ -30,7 +30,8 @@ Do not transform author and title input strings, assume they are valid XML.
 
 =back
 
-The usual C<--help> and C<--version> options are also supported.
+The usual C<--help> and C<--version> options are also supported. Options
+can begin with either C<-> or <C-->, and ordered arbitrarily.
 
 =head1 DESCRIPTION
 
@@ -63,7 +64,7 @@ correctly. If C<--input-is-xml> is given, the strings are output as-is,
 assuming they are valid XML; no checking is done.
 
 This script just writes an XML file. It's up to you to actually do the
-uploading to Crossref. For example, using their Java tool 
+uploading to Crossref; for example, you can use their Java tool 
 C<crossref-upload-tool.jar>
 (L<https://www.crossref.org/education/member-setup/direct-deposit-xml/https-post>).
 For the definition of their schema, see
@@ -126,9 +127,49 @@ multiple articles in a single C<.rpi> file, but it makes debugging and
 error correction easier when each uploaded XML contains a single
 article.
 
+=head2 MORE ABOUT AUTHOR NAMES
+
+The three formats for names recognized are (not coincidentally) the same
+as BibTeX:
+
+   First von Last
+   von Last, First
+   von Last, Jr., First
+   
+They can be freely intermixed within a single C<%authors> line. In
+short, you may almost always use the first form; you shouldn't if either
+there's a Jr part, or the Last part has multiple tokens but there's no
+von part. See the C<btxdoc> (``BibTeXing'' by Oren Patashnik) document
+for details.
+
+In the C<%authors> line of a C<.rpi> file, some secondary directives are
+recognized, indicated by C<|> characters. Easiest to explain with an
+example:
+
+  %authors=|organization|\LaTeX\ Project Team \and Alex Brown|orcid=123
+
+Thus: 1) if C<|organization|> is specified, the author name will be output
+as an C<organization> contributor, instead of the usual C<person_name>,
+as the Crossref schema requires.
+
+2) If C<|orcid=I<value>|> is specified, the I<value> is output as an
+C<orcid> element for that C<person_name>.
+
+These two directives, C<|organization>| and C<|orcid|> are mutually
+exclusive, because that's how the Crossref schema defines them. The C<=>
+sign after C<orcid> is required, while all spaces after the C<orcid>
+keyword are ignored. Other than that, the value is output literally. (The
+example value above is clearly invalid, but would be output anyway, with
+no warning.)
+
+Extra C<|> characters, at the beginning or end of the entire C<%authors>
+string, or doubled in the middle, are not necessary but are harmless.
+Whitespace is ignored around the C<|> characters.
+
 =head1 EXAMPLES
 
-  ltx2crossrefxml.pl ../paper1/paper1.tex ../paper2/paper2.tex -o result.xml
+  ltx2crossrefxml.pl ../paper1/paper1.tex ../paper2/paper2.tex \
+                      -o result.xml
 
   ltx2crossrefxml.pl -c myconfig.cnf paper.tex -o paper.xml
 
@@ -421,16 +462,10 @@ sub PrintPaper {
         <contributors>
 END
     my @authors = split /\s*\\and\s*/, $paper->{authors};
-    my $seq='first';
+    my $seq = 'first';
     foreach my $author (@authors) {
-	print OUT <<END;
-          <person_name sequence="$seq" contributor_role="author">
-END
-	PrintAuthor($author);
-	print OUT <<END;
-          </person_name>
-END
-        $seq='additional';
+	PrintAuthor($author, $seq);
+        $seq = 'additional';
     }
 
     print OUT <<END;
@@ -497,37 +532,95 @@ sub SanitizeText {
 }
 
 ################################################################
-# Printing one author
+# Printing one author in arg ORIG_AUTHOR, in sequence SEQ.
 ################################################################
 sub PrintAuthor {
-    my $author=shift;
+    my ($orig_author,$seq) = @_;
+
+    # recognize extra directives, either |organization|
+    # or |orcid=<value>|.
+    my $organization = 0;
+    my $orcid = 0;
+    my $author = "";
+    my @name_parts = split (/\|/, $orig_author);
+    for my $np (@name_parts) {
+        $np =~ s/^\s*(.*)\s*$/$1/s; # remove leading and trailing whitespace
+        if ($np eq "organization") {
+            $organization = 1;
+        } elsif ($np =~ /^orcid/) {
+            ($orcid = $np) =~ s/^orcid\s*=//;
+            $orcid =~ s/\s//g; # remove all whitespace from value
+            if (! $orcid) {
+                warn "$0: ignoring empty orcid specified in: $orig_author\n";
+            }
+        } elsif (! $np) {
+            # silently ignore empty part, as in ||
+        } else {
+            if ($author) {
+                die ("$0: already saw author name `$author', should not"
+                     . " have second: $np\n");
+            }
+            $author = $np;
+        }
+    }
+    
+    if ($organization && $orcid) {
+        die ("$0: orcid and organization cannot both be present in:"
+             . " $orig_author\n");
+    }
+
+    # for organizations, nothing to do but output it.
+    if ($organization) {
+        my $line = SanitizeText($author);
+        print OUT <<END;
+          <organization>$line</organization>
+END
+        return;
+    }
+    
+    # what's left is the common case of a person, not an organization.
+    print OUT <<END;
+          <person_name sequence="$seq" contributor_role="author">
+END
+
 
     my $person=new BibTeX::Parser::Author ($author);
 
     if ($person->first) {
-	my $line = $person->first;
-	$line = SanitizeText($line);
-	print OUT <<END;
+        my $line = $person->first;
+        $line = SanitizeText($line);
+        print OUT <<END;
             <given_name>$line</given_name>
 END
     }
 
     if ($person->last) {
-	my $line = SanitizeText($person->last);
-	if ($person->von) {
-	    $line = SanitizeText($person->von)." $line";
-	}
-	print OUT <<END;
+        my $line = SanitizeText($person->last);
+        if ($person->von) {
+            $line = SanitizeText($person->von)." $line";
+        }
+        print OUT <<END;
             <surname>$line</surname>
 END
     }
 
     if ($person->jr) {
-	my $line = SanitizeText($person->jr);
-	print OUT <<END;
+        my $line = SanitizeText($person->jr);
+        print OUT <<END;
             <suffix>$line</suffix>
 END
     }
+
+
+    if ($orcid) {
+        print OUT <<END;
+            <orcid>$orcid</orcid>
+END
+    }
+
+    print OUT <<END;
+          </person_name>
+END
 }
 
 #############################################################
