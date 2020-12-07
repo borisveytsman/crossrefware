@@ -153,7 +153,7 @@ as an C<organization> contributor, instead of the usual C<person_name>,
 as the Crossref schema requires.
 
 2) If C<|orcid=I<value>|> is specified, the I<value> is output as an
-C<orcid> element for that C<person_name>.
+C<ORCID> element for that C<person_name>.
 
 These two directives, C<|organization>| and C<|orcid|> are mutually
 exclusive, because that's how the Crossref schema defines them. The C<=>
@@ -614,7 +614,7 @@ END
 
     if ($orcid) {
         print OUT <<END;
-            <orcid>$orcid</orcid>
+            <ORCID>https://orcid.org/$orcid</ORCID>
 END
     }
 
