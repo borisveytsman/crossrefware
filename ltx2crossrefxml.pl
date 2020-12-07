@@ -454,6 +454,7 @@ sub PrintPaper {
     my $paper = shift;
     my $title=SanitizeText($paper->{title});
     my $url=GetURL($paper);
+    &TitleCheck($title);
     print OUT <<END;
       <journal_article publication_type="full_text">
         <titles>
@@ -503,7 +504,38 @@ END
 
 
 ###############################################################
-#  Sanitization of a text string, or no-op if --input-is-xml was given
+# Crossref <title> strings can contain a few so-called "face" HTML
+# commands. Complain if they have anything anything else.
+# https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#title
+#   face info: https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/face-markup/
+# mathml info: https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/including-
+# 
+# We don't technically validate the string, e.g., mismatched tags will
+# go unnoticed.
+###############################################################
+sub TitleCheck {
+    my $title = shift;
+    my $orig_title = $title;
+    
+    for my $tag (qw(b em i ovl scp strong sub sup tt u)) {
+        $title =~ s,<\s*/?$tag\s*>,,g; # eradicate <tag> and </tag>
+    }
+
+    # <font> can (maybe?) take lots of extra attributes:
+    $title =~ s,<\s*/?font.*?>,,g;
+
+    # MathML is too complex; just wipe it all out. If there are
+    # problems, the real validator at Crossref will complain.
+    $title =~ s,<\s*mml:math.*/mml:math\s*>,,g;
+    
+    # No tags should remain.
+    if ($title =~ /</) {
+       die "$0: invalid tags remaining in: $title (originally: $orig_title)\n";
+    }
+}
+
+###############################################################
+# Simplistic TeX-to-html (no-op if --input-is-xml was given).
 ###############################################################
 sub SanitizeText {
     my $string = shift;
