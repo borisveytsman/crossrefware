@@ -75,7 +75,7 @@ L<https://data.crossref.org/reports/help/schema_doc/4.4.2/index.html>
 =head1 CONFIGURATION FILE FORMAT
 
 The configuration file ignores comment lines starting with C<#> and
-blank lines. The other lines should be assignments in the form (spaces
+blank lines. The other lines are mostly assignments in the form (spaces
 are optional):
 
    $field = value ;
@@ -90,6 +90,17 @@ journal that is specified in the configuration file. More precisely, the
 configuration data is written as a C<journal_metadata> element, and then
 each C<.rpi> is written as C<journal_issue> plus C<journal_article>
 elements.
+
+The configuration file can also contain one Perl function:
+C<ltx2crossrefxml_local_ltx2unicode>. If it is defined, it is called at
+the beginning of the procedure that converts LaTeX text to Unicode. It
+takes one string (the LaTeX text), and should return one string
+(presumably the transformed string). The rest of the conversion is then
+applied to the returned string, so the configured function need only
+handle special cases, such as control sequences particular to the
+journal at hand. The conversion is done with the L<LaTeX::ToUnicode>
+module, from the C<bibtexperllibs> package
+(L<https://ctan.org/pkg/bibtexperllibs).
 
 =head1 RPI FILE FORMAT
 
@@ -172,7 +183,7 @@ Whitespace is ignored around the C<|> characters.
   ltx2crossrefxml.pl ../paper1/paper1.tex ../paper2/paper2.tex \
                       -o result.xml
 
-  ltx2crossrefxml.pl -c myconfig.cnf paper.tex -o paper.xml
+  ltx2crossrefxml.pl -c myconfig.cfg paper.tex -o paper.xml
 
 =head1 AUTHOR
 
@@ -522,12 +533,12 @@ END
 ###############################################################
 # Crossref <title> strings can contain a few so-called "face" HTML
 # commands. Complain if they have anything anything else.
-# https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#title
-#   face info: https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/face-markup/
-# mathml info: https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/including-
+# schema doc: https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#title
+#   face doc: https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/face-markup/
+# mathml doc: https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/including-mathml-in-deposits/
 # 
 # We don't technically validate the string, e.g., mismatched tags will
-# go unnoticed.
+# go unnoticed here. The real validator at Crossref will catch whatever.
 ###############################################################
 sub TitleCheck {
     my $title = shift;
@@ -551,31 +562,67 @@ sub TitleCheck {
 }
 
 ###############################################################
-# Simplistic TeX-to-html (no-op if --input-is-xml was given).
+# Simplistic TeX-to-html
+# (no-op for rpi text if --input-is-xml was given).
 ###############################################################
 sub SanitizeText {
     my $string = shift;
-    return $string if $opts{xi}; # do nothing if --input-is-xml
-    $string = LaTeX::ToUnicode::convert($string);
-    $string =~ s/\\newblock\b\s*//g;
-    $string =~ s/\\bgroup\b\s*//g;
-    $string =~ s/\\egroup\b\s*//g;
-    $string =~ s/\\scshape\b\s*//g;
-    $string =~ s/\\urlprefix\b\s*//g;
-    $string =~ s/\\emph\b\s*//g;
-    $string =~ s/\\textbf\b\s*//g;
-    $string =~ s/\\enquote\b\s*//g;
-    $string =~ s/\\url\b\s*/URL: /g;
-    $string =~ s/\\doi\b\s*/DOI: /g;
-    $string =~ s/\\\\/ /g;
+    return $string if $opts{xi}; # do nothing if --rpi-is-xml
+    return SanitizeTextAlways($string);
+}
+
+# Split into two functions so we can sanitize bbl but not rpi.
+sub SanitizeTextAlways {
+    my $string = shift;
+    
+    # call user's hook if the function is defined.
+    if (defined(&{"ltx2crossrefxml_local_ltx2unicode"})) {
+        $string = &ltx2crossrefxml_local_ltx2unicode($string)
+    }
+    
+    # conversion of accented control sequences to characters, etc.
+    $string = LaTeX::ToUnicode::convert($string, tugboat => 1);
+    
+    # some more common commands, that maybe should be in bibtexperllibs.
     $string =~ s/\\checkcomma/,/g;
-    $string =~ s/\$//g;
-    $string =~ s/\&/&amp;/g;
+    $string =~ s/\\cite\b\s*//g;
+    $string =~ s/\\enquote\b\s*//g;
+    $string =~ s/\\ignorespaces\b\s*//g;
+    $string =~ s/\\newblock\b\s*//g;
+    $string =~ s/\\newpage\b\s*//g;
+    $string =~ s/\\clearpage\b\s*//g;
+
+    $string =~ s/\\[be]group\b\s*//g;
+    $string =~ s/\\(begin|end)group\b\s*//g;
+
+    $string =~ s/\\(bf|it|rm|sc|sf|sl|tt)shape\b\s*//g;
+    $string =~ s/\\emph\b\s*//g;
+
+    $string =~ s/\\path\b\s*//g;
+    $string =~ s/\\urlprefix\b\s*//g;
+    $string =~ s/\\url\b\s*//g;
+    $string =~ s/\\doi\b\s*//g;
+    
+    # \href{URL}{TEXT} -> TEXT (URL)
+    $string =~ s/\\href\b\s*{([^}]*)}\s*{([^}]*)}/$2 ($1)/g;
+    
+    $string =~ s/\\\\/ /g;
     $string =~ s/~/ /g;
     $string =~ s/[{}]//g;
-    $string =~ s/^\s+//; # remove leading whitespace
-    $string =~ s/\s+$//; # remove trailing whitespace
-    $string =~ s/\s+/ /; # collapse all remaining whitespace to one space
+    
+    # Must replace XML metacharacters &<>. Can retain literal " (and '),
+    # although perhaps we should replace " somewhere.
+    $string =~ s/&/&amp;/g;
+    $string =~ s/</&lt;/g;
+    $string =~ s/>/&gt;/g;
+
+    # Backslashes might remain. Don't remove them, as it makes for a
+    # useful way to find unhandled commands.
+
+    $string =~ s/^\s+//;  # remove leading whitespace
+    $string =~ s/\s+$//;  # remove trailing whitespace
+    $string =~ s/\s+/ /g; # collapse all remaining whitespace to one space
+    
     return $string;
 }
 
@@ -676,16 +723,15 @@ END
 #############################################################
 sub PrintCitation {
     my $paperhash=shift;
+
     foreach my $key (keys (%{$paperhash})) {
-	my $citation=$paperhash->{$key};
-	$citation=SanitizeText($citation);
+	my $citation = $paperhash->{$key};
+	$citation = SanitizeTextAlways($citation);
 
 	print OUT <<END;
-          <citation key="$key">
-             <unstructured_citation>
-               $citation
-             </unstructured_citation>
-          </citation>
+          <citation key="$key"><unstructured_citation>
+            $citation
+          </unstructured_citation></citation>
 END
     }
 }
