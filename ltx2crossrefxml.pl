@@ -533,7 +533,7 @@ sub TitleCheck {
     my $title = shift;
     my $orig_title = $title;
     
-    for my $tag (qw(b em i ovl scp strong sub sup tt u)) {
+    foreach my $tag (qw(b em i ovl scp strong sub sup tt u)) {
         $title =~ s,<\s*/?$tag\s*>,,g; # eradicate <tag> and </tag>
     }
 
@@ -591,7 +591,7 @@ sub PrintAuthor {
     my $orcid = 0;
     my $author = "";
     my @name_parts = split (/\|/, $orig_author);
-    for my $np (@name_parts) {
+    foreach my $np (@name_parts) {
         $np =~ s/^\s*(.*)\s*$/$1/s; # remove leading and trailing whitespace
         if ($np eq "organization") {
             $organization = 1;
