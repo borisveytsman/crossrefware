@@ -388,12 +388,12 @@ sub AddPaper {
 # Reading a list of papers and adding  it to the
 # bibliography
 ##############################################################
-
 sub AddBibliography {
     my $bibfile = shift;
     open (BIB, $bibfile) or return;
+    my $basename = File::Basename::basename($bibfile, ".bbl");
     my $insidebibliography = 0;
-    my $currpaper="";
+    my $currpaper = "";
     my @result;
     my $key;
     while (<BIB>) {
@@ -402,13 +402,15 @@ sub AddBibliography {
 	    if ($insidebibliography) {
 		if ($currpaper) {
 		    my %paperhash;
-		    $paperhash{$key}=$currpaper;
+		    $paperhash{$key} = $currpaper;
 		    push @result, \%paperhash;
 		}
 	    }
-	    $key = $1;
-	    $currpaper="";
-	    $insidebibliography=1;
+	    # prepend filename to key to make it (hopefully) unique
+	    # in case the run is uploading multiple articles.
+	    $key = "$basename-$1";
+	    $currpaper = "";
+	    $insidebibliography = 1;
 	    next;
 	}
 	if (/^\s*\\end\{thebibliography\}/) {
