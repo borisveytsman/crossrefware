@@ -191,20 +191,30 @@ extent permitted by law.
  use strict;
  use warnings;
 
+ use Cwd;
+ use File::Basename;
+ use File::Spec;
+
  BEGIN {
      # find files relative to our installed location within TeX Live
      chomp(my $TLMaster = `kpsewhich -var-value=SELFAUTOPARENT`); # TL root
      if (length($TLMaster)) {
 	 unshift @INC, "$TLMaster/texmf-dist/scripts/bibtexperllibs";
      }
-     unshift @INC, "."; # since the config file is probably in the cwd
+     # find development bibtexperllibs in sibling checkout to this script,
+     # even if $0 is a symlink. All irrelevant when using from an installation.
+     my $real0 = Cwd::abs_path($0);
+     my $scriptdir = File::Basename::dirname($real0);
+     my $dev_btxperllibs = Cwd::abs_path("$scriptdir/../bibtexperllibs");
+     # we need the lib/ subdirectories inside ...
+     unshift (@INC, glob ("$dev_btxperllibs/*/lib")) if -d $dev_btxperllibs;
  }
 
  use POSIX qw(strftime);
+
  use BibTeX::Parser::Author;
  use LaTeX::ToUnicode qw (convert);
- use File::Basename;
- use File::Spec;
+
  my $USAGE = <<END;
 Usage: $0 [-c CONFIG] [-o OUTPUT] LTXFILE1 LTXFILE2 ...
 
@@ -274,7 +284,10 @@ END
 
  if ($opts{c}) {
      if (-r $opts{c}) {
-	 require $opts{c};
+         # if config arg is absolute, fine; if not, prepend "./" as slightly
+         # less troublesome than putting "." in the @INC path.
+         my $rel = (File::Spec->file_name_is_absolute($opts{c}) ? "" : "./");
+	 require "$rel$opts{c}";
      } else {
 	 die "Cannot read config file $opts{c}. Goodbye.";
      }
