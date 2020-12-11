@@ -24,7 +24,7 @@ See below for its format.
 
 Output file.  If this option is not used, the XML is output to stdout.
 
-=item B<-input-is-xml>
+=item B<-rpi-is-xml>
 
 Do not transform author and title input strings, assume they are valid XML.
 
@@ -55,13 +55,14 @@ no C<citation_list> is output. (By the way, the companion C<bbl2bib>
 program attempts to reconstruct a C<.bib> file from a C<.bbl>, if the
 papers can be found in the MR database.)
 
-Unless C<--input-is-xml> is specified, for all text (authors, title,
+Unless C<--rpi-is-xml> is specified, for all text (authors, title,
 citations), standard TeX control sequences are replaced with plain text
 or UTF-8 or eliminated, as appropriate. The C<LaTeX::ToUnicode::convert>
 routine is used for this (L<https://ctan.org/pkg/bibtexperllibs>).
 Tricky TeX control sequences will almost surely not be handled
-correctly. If C<--input-is-xml> is given, the strings are output as-is,
-assuming they are valid XML; no checking is done.
+correctly. If C<--rpi-is-xml> is given, the author and title strings
+from the rpi files are output as-is, assuming they are valid XML; no
+checking is done. Citation text is still converted.
 
 This script just writes an XML file. It's up to you to actually do the
 uploading to Crossref; for example, you can use their Java tool 
@@ -246,7 +247,7 @@ END
  GetOptions(
    "config|c=s" => \($opts{c}),
    "output|o=s" => \($opts{o}),
-   "input-is-xml!" => \($opts{xi}),
+   "rpi-is-xml!"=> \($opts{xi}),
    "version|V"  => \($opts{V}),
    "help|?"     => \($opts{h})) || pod2usage(1);
 
