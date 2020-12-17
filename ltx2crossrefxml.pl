@@ -100,7 +100,7 @@ applied to the returned string, so the configured function need only
 handle special cases, such as control sequences particular to the
 journal at hand. The conversion is done with the L<LaTeX::ToUnicode>
 module, from the C<bibtexperllibs> package
-(L<https://ctan.org/pkg/bibtexperllibs).
+(L<https://ctan.org/pkg/bibtexperllibs>).
 
 =head1 RPI FILE FORMAT
 
@@ -117,6 +117,7 @@ fake, of course):
   %endpage=1
   %doi=10.11612/resphil.A31245
   %paperUrl=http://borisv.lk.net/paper12
+  %publicationType=abstract_only
 
 Other lines, some not beginning with %, are ignored (and not shown).
 For more details on processing, see the code.
@@ -126,12 +127,19 @@ The C<%paperUrl> value is what will be associated with the given C<%doi>
 the url be for a so-called landing page, and not a PDF
 (L<https://www.crossref.org/education/member-setup/creating-a-landing-page/>).
 If the url is not specified, a special-purpose lookup is done for
-I<S<Res Philosophica>> journal.
+I<S<Res Philosophica>> journal using L<pdcnet.org>.
 
 The C<%authors> field is split at C<\and> (ignoring whitespace before
 and after), and output as the C<contributors> element, using
 C<sequence="first"> for the first listed, C<sequence="additional"> for
 the remainder.
+
+If the C<%publicationType> is not specified, it defaults to
+C<full_text>, since that has historically been the case; C<full_text>
+can also be given explicitly. The other values allowed by the Crossref
+schema are C<abstract_only> and C<bibliographic_record>. Finally, if the
+value is C<omit>, the C<publication_type> attribute is omitted entirely
+from the given C<journal_article> element.
 
 Each C<.rpi> must contain information for only one article, but multiple
 files can be read in a single run. It would not be difficult to support
@@ -466,9 +474,7 @@ sub PrintIssueHead {
         <publication_date media_type="print">
           <year>$year</year>
         </publication_date>
-        <journal_volume>
-          <volume>$volume</volume>
-        </journal_volume>
+        <journal_volume><volume>$volume</volume></journal_volume>
         <issue>$issue</issue>
       </journal_issue>
 END
@@ -479,11 +485,13 @@ END
 ###############################################################
 sub PrintPaper {
     my $paper = shift;
-    my $title=SanitizeText($paper->{title});
-    my $url=GetURL($paper);
+    my $title = SanitizeText($paper->{title});
+    my $url = GetURL($paper);
+    my $publication_type = GetPublicationType($paper->{publicationType});
+    
     &TitleCheck($title);
     print OUT <<END;
-      <journal_article publication_type="full_text">
+      <journal_article$publication_type>
         <titles>
            <title>$title</title>
         </titles>
@@ -706,7 +714,6 @@ END
 END
     }
 
-
     if ($orcid) {
         print OUT <<END;
             <ORCID>https://orcid.org/$orcid</ORCID>
@@ -734,6 +741,33 @@ sub PrintCitation {
           </unstructured_citation></citation>
 END
     }
+}
+
+##############################################################
+#  Return publication_type attribute for <journal_article>, given $PUBTYPE.
+#  https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#publication_type.atts
+#  
+#  If not specified in input, return " publication_type=full_text" since
+#  it was hardwired that way before. If set to "omit", return empty
+#  string. Else return " publication_type=$PUBTYPE>, if the value
+#  is valid. If not, die. (Leading space is so result can be directly used.)
+##############################################################
+sub GetPublicationType {
+    my $pubtype = shift;
+    my $ret;
+
+    if (! $pubtype) {
+        $ret = "full_text"; 
+    } elsif ($pubtype eq "omit") {
+        $ret = "";
+    } elsif ($pubtype =~ /^(abstract_only|full_text|bibliographic_record)$/) {
+        $ret = $pubtype;
+    } else {
+        die "$0: invalid publication_type: $pubtype\n";
+    }
+    
+    $ret = " publication_type=\"$ret\"" if $ret;
+    return $ret;
 }
 
 ##############################################################
