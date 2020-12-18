@@ -104,7 +104,7 @@ module, from the C<bibtexperllibs> package
 
 =head1 RPI FILE FORMAT
 
-Here's the (relevant part of the) C<.rpi> file created from the
+Here's the (relevant part of the) C<.rpi> file corresponding to the
 C<rpsample.tex> example in the resphilosophica package (all the data is
 fake, of course):
 
@@ -117,7 +117,7 @@ fake, of course):
   %endpage=1
   %doi=10.11612/resphil.A31245
   %paperUrl=http://borisv.lk.net/paper12
-  %publicationType=abstract_only
+  %publicationType=full_text
 
 Other lines, some not beginning with %, are ignored (and not shown).
 For more details on processing, see the code.
@@ -126,8 +126,9 @@ The C<%paperUrl> value is what will be associated with the given C<%doi>
 (output as the C<resource> element). Crossref strongly recommends that
 the url be for a so-called landing page, and not a PDF
 (L<https://www.crossref.org/education/member-setup/creating-a-landing-page/>).
-If the url is not specified, a special-purpose lookup is done for
-I<S<Res Philosophica>> journal using L<pdcnet.org>.
+If the url is not specified, a special-purpose url using L<pdcnet.org>
+for the I<S<Res Philosophica>> journal is returned. So any other journal
+must always specify this.
 
 The C<%authors> field is split at C<\and> (ignoring whitespace before
 and after), and output as the C<contributors> element, using
@@ -778,11 +779,12 @@ sub GetURL {
 
     my $result;
     if ($paper->{paperUrl}) {
-	$result= $paper->{paperUrl}
+	$result = $paper->{paperUrl}
     } else {
-	my $doi=$paper->{doi};
-	$result= 'http://www.pdcnet.org/oom/service?url_ver=Z39.88-2004&rft_val_fmt=&rft.imuse_synonym=resphilosophica&rft.DOI='.$doi.'&svc_id=info:www.pdcnet.org/collection';
+	my $doi = $paper->{doi};
+	$result = 'http://www.pdcnet.org/oom/service?url_ver=Z39.88-2004&rft_val_fmt=&rft.imuse_synonym=resphilosophica&rft.DOI='.$doi.'&svc_id=info:www.pdcnet.org/collection';
     }
-    $result =~ s/&/&#38;/g;
+    
+    $result =~ s/&/&#x26;/g;
     return $result;
 }
