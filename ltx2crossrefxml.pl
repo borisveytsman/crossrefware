@@ -406,19 +406,17 @@ sub PrintHead {
     </depositor>
     <registrant>$registrant</registrant>
   </head>
-  <body>
-    <journal>
-      <journal_metadata language="en">
-        <full_title>$fullTitle</full_title>$abbrev_title_out
-	<issn>$issn</issn>$coden_out	
-      </journal_metadata>
+  <body><journal>
+    <journal_metadata language="en">
+      <full_title>$fullTitle</full_title>$abbrev_title_out
+      <issn>$issn</issn>$coden_out	
+    </journal_metadata>
 END
 }
 
 sub PrintTail {
     print OUT <<END;
-    </journal>
-  </body>
+  </journal></body>
 </doi_batch>
 END
 
@@ -552,13 +550,13 @@ sub AddBibliography {
 sub PrintIssueHead {
     my ($year, $volume, $issue) = @_;
     print OUT <<END;
-      <journal_issue>
-        <publication_date media_type="print">
-          <year>$year</year>
-        </publication_date>
-        <journal_volume><volume>$volume</volume></journal_volume>
-        <issue>$issue</issue>
-      </journal_issue>
+    <journal_issue>
+      <publication_date media_type="print">
+        <year>$year</year>
+      </publication_date>
+      <journal_volume><volume>$volume</volume></journal_volume>
+      <issue>$issue</issue>
+    </journal_issue>
 END
 }
 
@@ -573,11 +571,11 @@ sub PrintPaper {
     
     &TitleCheck($title);
     print OUT <<END;
-      <journal_article$publication_type>
-        <titles>
-           <title>$title</title>
-        </titles>
-        <contributors>
+    <journal_article$publication_type>
+      <titles>
+        <title>$title</title>
+      </titles>
+      <contributors>
 END
     my @authors = split /\s*\\and\s*/, $paper->{authors};
     my $seq = 'first';
@@ -587,35 +585,35 @@ END
     }
 
     print OUT <<END;
-        </contributors>
-        <publication_date media_type="print">
-           <year>$paper->{year}</year>
-        </publication_date>
-        <pages>
-           <first_page>$paper->{startpage}</first_page>
-           <last_page>$paper->{endpage}</last_page>
-        </pages>
-        <doi_data>
-          <doi>$paper->{doi}</doi>
-          <timestamp>$timestamp</timestamp>
-	  <resource>$url</resource>
-        </doi_data>
+      </contributors>
+      <publication_date media_type="print">
+        <year>$paper->{year}</year>
+      </publication_date>
+      <pages>
+        <first_page>$paper->{startpage}</first_page>
+        <last_page>$paper->{endpage}</last_page>
+      </pages>
+      <doi_data>
+        <doi>$paper->{doi}</doi>
+        <timestamp>$timestamp</timestamp>
+        <resource>$url</resource>
+      </doi_data>
 END
 
     if (scalar(@{$paper->{bibliography}})) {
     print OUT <<END;
-        <citation_list>
+      <citation_list>
 END
     foreach my $citation (@{$paper->{bibliography}}) {
 	PrintCitation($citation);
     }
     print OUT <<END;
-        </citation_list>
+      </citation_list>
 END
     }
 
     print OUT <<END;
-      </journal_article>
+    </journal_article>
 END
 }
 
@@ -758,14 +756,14 @@ sub PrintAuthor {
     if ($organization) {
         my $line = SanitizeText($author);
         print OUT <<END;
-          <organization>$line</organization>
+        <organization>$line</organization>
 END
         return;
     }
     
     # what's left is the common case of a person, not an organization.
     print OUT <<END;
-          <person_name sequence="$seq" contributor_role="author">
+        <person_name sequence="$seq" contributor_role="author">
 END
 
 
@@ -775,7 +773,7 @@ END
         my $line = $person->first;
         $line = SanitizeText($line);
         print OUT <<END;
-            <given_name>$line</given_name>
+          <given_name>$line</given_name>
 END
     }
 
@@ -785,25 +783,25 @@ END
             $line = SanitizeText($person->von)." $line";
         }
         print OUT <<END;
-            <surname>$line</surname>
+          <surname>$line</surname>
 END
     }
 
     if ($person->jr) {
         my $line = SanitizeText($person->jr);
         print OUT <<END;
-            <suffix>$line</suffix>
+          <suffix>$line</suffix>
 END
     }
 
     if ($orcid) {
         print OUT <<END;
-            <ORCID>https://orcid.org/$orcid</ORCID>
+          <ORCID>https://orcid.org/$orcid</ORCID>
 END
     }
 
     print OUT <<END;
-          </person_name>
+        </person_name>
 END
 }
 
@@ -818,9 +816,9 @@ sub PrintCitation {
 	$citation = SanitizeTextAlways($citation);
 
 	print OUT <<END;
-          <citation key="$key"><unstructured_citation>
-            $citation
-          </unstructured_citation></citation>
+        <citation key="$key"><unstructured_citation>
+          $citation
+        </unstructured_citation></citation>
 END
     }
 }
