@@ -46,14 +46,8 @@ example is below. These files are output by the C<resphilosophica>
 package (L<https://ctan.org/pkg/resphilosophica>), but (as always) can
 also be created by hand or by whatever other method you implement.
 
-The C<.bbl> files are used for creating the C<citation_list> element in
-the metadata. The processing is rudimentary: only so-called
-C<unstructured_citation> references are produced for Crossref, that is,
-the contents of the citation (each paragraph in the C<.bbl>) is dumped
-as a single flat string. If no C<.bbl> file exists for a given C<.rpi>,
-no C<citation_list> is output. (By the way, the companion C<bbl2bib>
-program attempts to reconstruct a C<.bib> file from a C<.bbl>, if the
-papers can be found in the MR database.)
+Any C<.bbl> files are used to output citation information in
+the output XML. See the <CITATIONS> section below.
 
 Unless C<--rpi-is-xml> is specified, for all text (authors, title,
 citations), standard TeX control sequences are replaced with plain text
@@ -62,7 +56,7 @@ routine is used for this (L<https://ctan.org/pkg/bibtexperllibs>).
 Tricky TeX control sequences will almost surely not be handled
 correctly. If C<--rpi-is-xml> is given, the author and title strings
 from the rpi files are output as-is, assuming they are valid XML; no
-checking is done. Citation text is still converted.
+checking is done. Citation text from C<.bbl> files is always converted.
 
 This script just writes an XML file. It's up to you to actually do the
 uploading to Crossref; for example, you can use their Java tool 
@@ -105,8 +99,8 @@ module, from the C<bibtexperllibs> package
 =head1 RPI FILE FORMAT
 
 Here's the (relevant part of the) C<.rpi> file corresponding to the
-C<rpsample.tex> example in the resphilosophica package (all the data is
-fake, of course):
+C<rpsample.tex> example in the C<resphilosophica> package
+(L<https://ctan.org/pkg/resphilosophica>):
 
   %authors=Boris Veytsman\and A. U. Th{\o }r\and C. O. R\"espondent
   %title=A Sample Paper:\\ \emph  {A Template}
@@ -126,9 +120,10 @@ The C<%paperUrl> value is what will be associated with the given C<%doi>
 (output as the C<resource> element). Crossref strongly recommends that
 the url be for a so-called landing page, and not a PDF
 (L<https://www.crossref.org/education/member-setup/creating-a-landing-page/>).
-If the url is not specified, a special-purpose url using L<pdcnet.org>
-for the I<S<Res Philosophica>> journal is returned. So any other journal
-must always specify this.
+(Special case: if the url is not specified, 
+and the journal is I<S<Res Philosophica>>,
+a special-purpose search url using L<pdcnet.org> is returned.)
+Any other journalmust always specify this.
 
 The C<%authors> field is split at C<\and> (ignoring whitespace before
 and after), and output as the C<contributors> element, using
@@ -157,11 +152,14 @@ as BibTeX:
    von Last, First
    von Last, Jr., First
    
-They can be freely intermixed within a single C<%authors> line. In
-short, you may almost always use the first form; you shouldn't if either
-there's a Jr part, or the Last part has multiple tokens but there's no
-von part. See the C<btxdoc> (``BibTeXing'' by Oren Patashnik) document
-for details.
+The forms can be freely intermixed within a single C<%authors> line,
+separated with C<\and> (including the backslash). Commas as name
+separators are not supported (unlike BibTeX).
+
+In short, you may almost always use the first form; you shouldn't if
+either there's a Jr part, or the Last part has multiple tokens but
+there's no von part. See the C<btxdoc> (``BibTeXing'' by Oren Patashnik)
+document for details.
 
 In the C<%authors> line of a C<.rpi> file, some secondary directives are
 recognized, indicated by C<|> characters. Easiest to explain with an
@@ -179,13 +177,53 @@ C<ORCID> element for that C<person_name>.
 These two directives, C<|organization>| and C<|orcid|> are mutually
 exclusive, because that's how the Crossref schema defines them. The C<=>
 sign after C<orcid> is required, while all spaces after the C<orcid>
-keyword are ignored. Other than that, the value is output literally. (The
-example value above is clearly invalid, but would be output anyway, with
-no warning.)
+keyword are ignored. Other than that, the ORCID value is output
+literally. (E.g., the ORCID value of C<123> above is clearly invalid,
+but it would be output anyway, with no warning.)
 
 Extra C<|> characters, at the beginning or end of the entire C<%authors>
-string, or doubled in the middle, are not necessary but are harmless.
-Whitespace is ignored around the C<|> characters.
+string, or doubled in the middle, are accepted and ignored. Whitespace
+is ignored around all C<|> characters.
+
+=head1 CITATIONS
+
+Each C<.bbl> file corresponding to an input C<.rpi> file is read and
+used to output a C<citation_list> element for that C<journal_article> in
+the output XML. If no C<.bbl> file exists for a given C<.rpi>,
+no C<citation_list> is output for that article.
+
+The C<.bbl> processing is rudimentary: only so-called
+C<unstructured_citation> references are produced for Crossref, that is,
+the contents of the citation (each paragraph in the C<.bbl>) is dumped
+as a single flat string.
+
+Bibliography text is unconditionally converted from TeX to XML, via the
+method described above. It is not unusual for the conversion to be
+incomplete or incorrect.  It is up to you to check for this; e.g., if
+any backslashes remain in the output, it is most likely an error.
+
+Furthermore, it is assumed that the C<.bbl> file contains a sequence of
+references, each starting with C<\bibitem{I<KEY>}> (which itself must be
+at the beginning of a line, preceded only by whitespace), and the whole
+bibliography ending with C<\end{thebibliography}> (similarly at the
+beginning of a line). A bibliography not following this format will not
+produce useful results. It can be created by hand, or with BibTeX, or
+any other method.
+
+The C<key> attribute for the C<citation> element is taken as the I<KEY>
+argument to the C<\bibitem> command. The sequential number of the
+citation (1, 2, ...) is appended. The argument to C<\bibitem> can be
+empty (C<\bibitem{}>, and the sequence number will be used on its own.
+Although TeX will not handle empty C<\bibitem> keys, when creating a
+C<.bbl> purely for Crossref, it can be convenient.
+
+The C<.rpi> file is also checked for the bibliography information, in
+this same format.
+
+Feature request: if anyone is interested in figuring out how to generate
+structured citations
+(L<https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#citation>)
+instead of these flat text dumps, that would be great.
 
 =head1 EXAMPLES
 
@@ -389,7 +427,7 @@ END
 
 
 #######################################################
-#  Adding one paper
+#  Adding one paper from $file.rpi and .bbl to global %papers.
 #######################################################
 sub AddPaper {
     my $file = shift;
@@ -406,55 +444,90 @@ sub AddPaper {
                   . " an .rpi file should have data for only one article,"
                   . " but overwriting with `$2' anyway.\n";
            }
-           $data{$1}=$2;
+           $data{$1} = $2;
         }
     }
     close RPI;
+    
+    # look for bibliographies in both the .rpi and any .bbl file.
     my @bibliography;
     foreach my $bibfile ($file, File::Spec->catfile($path, "$name.bbl")) {
          @bibliography = (@bibliography, AddBibliography($bibfile));
     }
-    $data{'bibliography'}=\@bibliography;
+    $data{'bibliography'} = \@bibliography;
+
+    # Die if the fields we use unconditionally are empty. Not all of
+    # them are required by the schema, but we can wait to generalize.
+    foreach my $field (qw(title year volume issue startpage endpage doi)) {
+        if (! $data{$field}) {
+            die ("$0: field must not be empty: $field\n  "
+                 . &debug_hash_as_string("whole hash", %data));
+        }
+    }
+
     push @{$papers{$data{year}}->{$data{volume}}->{$data{issue}}}, \%data;
 }
 
 ############################################################## 
-# Reading a list of papers and adding  it to the
-# bibliography
+# Reading a list of papers from BIBFILE and adding it to the
+# bibliography. Each item is assumed to start with
+# \bibitem{KEY} and the whole bib to end with \end{thebibliography}.
+# 
+# We return a list of hashes, each hash with a single key, the citation
+# key, and its value a flat string of the entry.
+# 
+# No conversion of the text is done here.
 ##############################################################
 sub AddBibliography {
     my $bibfile = shift;
     open (BIB, $bibfile) or return;
-    my $basename = File::Basename::basename($bibfile, ".bbl");
+    
     my $insidebibliography = 0;
-    my $currpaper = "";
+    my $currpaper = ""; # that is, the current bib entry
+    my $bibno = 0;
     my @result;
     my $key;
     while (<BIB>) {
 	chomp;
-	if (/^\s*\\bibitem(?:\[.*\])?+\{(.+)\}/) {
+	next if /^\s*%/; # TeX comment line
+	s/[ \t]%.*//;    # remove TeX comment
+	#
+	# allow empty \bibitem key for the sake of handwritten bbls.
+	# Similarly, might be more stuff on the line when handwritten.
+	if (s/^\s*\\bibitem(?:\[.*?\])?+\s*\{(.*?)\}//) {
+	    my $newkey = $1;
 	    if ($insidebibliography) {
 		if ($currpaper) {
-		    my %paperhash;
+                    # Append the current sequence number for this citation,
+                    # since that's what Crossref recommends (sort of).
+                    # For prettiness, if the key is otherwise empty,
+                    # don't include a dash beforehand.
+		    $bibno++;
+                    $key .= ($key ? "-" : "") . $bibno;
+                    #
+                    my %paperhash;
 		    $paperhash{$key} = $currpaper;
 		    push @result, \%paperhash;
 		}
 	    }
-	    # prepend filename to key to make it (hopefully) unique
-	    # in case the run is uploading multiple articles.
-	    $key = "$basename-$1";
-	    $currpaper = "";
+	    # The citation key (required by schema) starts as the bibitem key.
+	    $key = $newkey;
+	    
+	    $currpaper = $_;
 	    $insidebibliography = 1;
 	    next;
 	}
 	if (/^\s*\\end\{thebibliography\}/) {
 	    if ($currpaper) {
-		    my %paperhash;
-		    $paperhash{$key}=$currpaper;
-		    push @result, \%paperhash;
+	        $bibno++;
+                $key .= ($key ? "-" : "") . $bibno;
+                #
+		my %paperhash;
+		$paperhash{$key} = $currpaper;
+		push @result, \%paperhash;
 	    }
-	    $currpaper="";
-	    $insidebibliography=0;
+	    $currpaper = "";
+	    $insidebibliography = 0;
 	    next;
 	}
 	if ($insidebibliography) {
@@ -462,6 +535,14 @@ sub AddBibliography {
 	}
     }
     close BIB;
+    
+    # We look in the .rpi files too, which will generally have none.
+    if (@result == 0 && $bibfile =~ /\.bbl$/) {
+        warn "$0: no \\bibitems found in: $bibfile\n";
+    } elsif ($insidebibliography) {
+        warn "$0: no \\end{thebibliography} found in: $bibfile\n";
+        warn "$0:   so the last bib entry is missing.\n";
+    }
     return @result;
 }
 
@@ -583,14 +664,14 @@ sub SanitizeText {
 # Split into two functions so we can sanitize bbl but not rpi.
 sub SanitizeTextAlways {
     my $string = shift;
-    
-    # call user's hook if the function is defined.
+   
+    # call user hook function if it's defined.
     if (defined(&{"ltx2crossrefxml_local_ltx2unicode"})) {
         $string = &ltx2crossrefxml_local_ltx2unicode($string)
     }
     
     # conversion of accented control sequences to characters, etc.
-    $string = LaTeX::ToUnicode::convert($string, tugboat => 1);
+    $string = LaTeX::ToUnicode::convert($string);
     
     # some more common commands, that maybe should be in bibtexperllibs.
     $string =~ s/\\checkcomma/,/g;
@@ -772,7 +853,7 @@ sub GetPublicationType {
 }
 
 ##############################################################
-#  Calculating URL
+#  Calculating URL. Res Philosophica gets special treatment.
 ##############################################################
 sub GetURL {
     my $paper = shift;
@@ -780,11 +861,43 @@ sub GetURL {
     my $result;
     if ($paper->{paperUrl}) {
 	$result = $paper->{paperUrl}
-    } else {
+
+    } elsif ($paper->{doi} =~ m,^10\.11612/resphil,) {
 	my $doi = $paper->{doi};
 	$result = 'http://www.pdcnet.org/oom/service?url_ver=Z39.88-2004&rft_val_fmt=&rft.imuse_synonym=resphilosophica&rft.DOI='.$doi.'&svc_id=info:www.pdcnet.org/collection';
+
+    } else {
+        die ("$0: paperUrl field is required\n  "
+             . &debug_hash_as_string("whole hash", $paper));
     }
     
-    $result =~ s/&/&#x26;/g;
+    $result =~ s/&/&#x26;/g; # amp(ersand)
     return $result;
+}
+
+
+##############################################################
+#  debug_hash_as_string($LABEL, HASH)
+#
+# Return LABEL followed by HASH elements, followed by a newline, as a
+# single string. If HASH is a reference, it is followed (but no recursive
+# derefencing).
+###############################################################
+sub debug_hash_as_string {
+  my ($label) = shift;
+  my (%hash) = (ref $_[0] && $_[0] =~ /.*HASH.*/) ? %{$_[0]} : @_;
+
+  my $str = "$label: {";
+  my @items = ();
+  for my $key (sort keys %hash) {
+    my $val = $hash{$key};
+    $val = ".undef" if ! defined $val;
+    $key =~ s/\n/\\n/g;
+    $val =~ s/\n/\\n/g;
+    push (@items, "$key:$val");
+  }
+  $str .= join (",", @items);
+  $str .= "}";
+
+  return "$str\n";
 }
