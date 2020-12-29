@@ -669,7 +669,9 @@ sub SanitizeTextAlways {
     }
     
     # conversion of accented control sequences to characters, etc.
-    $string = LaTeX::ToUnicode::convert($string);
+    # Let's use &#uuuu; entities instead of literal UTF-8; Crossref
+    # recommends it, and it's easier for postprocessing.
+    $string = LaTeX::ToUnicode::convert($string, outputfmt => "entities");
     
     # some more common commands, that maybe should be in bibtexperllibs.
     $string =~ s/\\checkcomma/,/g;
@@ -683,7 +685,6 @@ sub SanitizeTextAlways {
     $string =~ s/\\[be]group\b\s*//g;
     $string =~ s/\\(begin|end)group\b\s*//g;
 
-    $string =~ s/\\(bf|it|rm|sc|sf|sl|tt)shape\b\s*//g;
     $string =~ s/\\emph\b\s*//g;
 
     $string =~ s/\\path\b\s*//g;
@@ -698,12 +699,6 @@ sub SanitizeTextAlways {
     $string =~ s/~/ /g;
     $string =~ s/[{}]//g;
     
-    # Must replace XML metacharacters &<>. Can retain literal " (and '),
-    # although perhaps we should replace " somewhere.
-    $string =~ s/&/&amp;/g;
-    $string =~ s/</&lt;/g;
-    $string =~ s/>/&gt;/g;
-
     # Backslashes might remain. Don't remove them, as it makes for a
     # useful way to find unhandled commands.
 
