@@ -31,13 +31,13 @@ Do not transform author and title input strings, assume they are valid XML.
 =back
 
 The usual C<--help> and C<--version> options are also supported. Options
-can begin with either C<-> or <C-->, and ordered arbitrarily.
+can begin with either C<-> or C<-->, and ordered arbitrarily.
 
 =head1 DESCRIPTION
 
 For each given I<latex_file>, this script reads C<.rpi> and (if they
 exist) C<.bbl> files and outputs corresponding XML that can be uploaded
-to Crossref (L<https://crossref.org>). The extension of I<latex_file> is
+to Crossref (L<https://crossref.org>). Any extension of I<latex_file> is
 ignored, and I<latex_file> itself is not read (and need not even exist).
 
 Each C<.rpi> file specifies the metadata for a single article to be
@@ -46,8 +46,8 @@ example is below. These files are output by the C<resphilosophica>
 package (L<https://ctan.org/pkg/resphilosophica>), but (as always) can
 also be created by hand or by whatever other method you implement.
 
-Any C<.bbl> files are used to output citation information in
-the output XML. See the <CITATIONS> section below.
+Any C<.bbl> files present are used for the citation information in the
+output XML. See the L<CITATIONS> section below.
 
 Unless C<--rpi-is-xml> is specified, for all text (authors, title,
 citations), standard TeX control sequences are replaced with plain text
@@ -56,7 +56,8 @@ routine is used for this (L<https://ctan.org/pkg/bibtexperllibs>).
 Tricky TeX control sequences will almost surely not be handled
 correctly. If C<--rpi-is-xml> is given, the author and title strings
 from the rpi files are output as-is, assuming they are valid XML; no
-checking is done. Citation text from C<.bbl> files is always converted.
+checking is done. Citation text from C<.bbl> files is always converted
+from LaTeX to plain text.
 
 This script just writes an XML file. It's up to you to actually do the
 uploading to Crossref; for example, you can use their Java tool 
@@ -68,33 +69,41 @@ L<https://data.crossref.org/reports/help/schema_doc/4.4.2/index.html>
 
 =head1 CONFIGURATION FILE FORMAT
 
-The configuration file ignores comment lines starting with C<#> and
-blank lines. The other lines are mostly assignments in the form (spaces
-are optional):
+The configuration file is read as Perl code. Thus, comment lines
+starting with C<#> and blank lines are ignored. The other lines are
+typically assignments in the form (spaces are optional):
 
-   $field = value ;
+    $variable = value ;
 
-Usually the value is a C<"string"> enclosed in ASCII double-quote
-characters (the file is processed by Perl). The idea is to specify the
+Usually the value is a C<"string"> enclosed in ASCII double-quote or
+single-quote characters, per Perl syntax. The idea is to specify the
 user-specific and journal-specific values needed for the Crossref
-upload.
+upload. The variables which are used are these:
+
+    $depositorName = "Depositor Name";
+    $depositorEmail = 'depositor@example.org';
+    $registrant = 'Registrant';  # organization name
+    $fullTitle = "FULL TITLE";   # journal name
+    $issn = "1234-5678";         # required
+    $abbrevTitle = "ABBR. TTL."; # optional
+    $coden = "CODEN";            # optional
+
 
 For a given run, all C<.rpi> data read is assumed to belong to the
 journal that is specified in the configuration file. More precisely, the
-configuration data is written as a C<journal_metadata> element, and then
-each C<.rpi> is written as C<journal_issue> plus C<journal_article>
-elements.
+configuration data is written as a C<journal_metadata> element, with
+given C<full_title>, C<issn>, etc., and then each C<.rpi> is written as
+C<journal_issue> plus C<journal_article> elements.
 
-The configuration file can also contain one Perl function:
-C<ltx2crossrefxml_local_ltx2unicode>. If it is defined, it is called at
-the beginning of the procedure that converts LaTeX text to Unicode. It
-takes one string (the LaTeX text), and should return one string
-(presumably the transformed string). The rest of the conversion is then
-applied to the returned string, so the configured function need only
-handle special cases, such as control sequences particular to the
-journal at hand. The conversion is done with the L<LaTeX::ToUnicode>
-module, from the C<bibtexperllibs> package
-(L<https://ctan.org/pkg/bibtexperllibs>).
+The configuration file can also define one Perl function:
+C<LaTeX_ToUnicode_convert_hook>. If it is defined, it is called at the
+beginning of the procedure that converts LaTeX text to Unicode, which is
+done with the L<LaTeX::ToUnicode> module, from the C<bibtexperllibs>
+package (L<https://ctan.org/pkg/bibtexperllibs>). The function must
+accept one string (the LaTeX text), and return one string (presumably
+the transformed string). The standard conversions are then applied to
+the returned string, so the configured function need only handle special
+cases, such as control sequences particular to the journal at hand.
 
 =head1 RPI FILE FORMAT
 
@@ -118,12 +127,12 @@ For more details on processing, see the code.
 
 The C<%paperUrl> value is what will be associated with the given C<%doi>
 (output as the C<resource> element). Crossref strongly recommends that
-the url be for a so-called landing page, and not a PDF
+the url be for a so-called landing page, and not directly for a pdf
 (L<https://www.crossref.org/education/member-setup/creating-a-landing-page/>).
-(Special case: if the url is not specified, 
+Special case: if the url is not specified, 
 and the journal is I<S<Res Philosophica>>,
-a special-purpose search url using L<pdcnet.org> is returned.)
-Any other journalmust always specify this.
+a special-purpose search url using L<pdcnet.org> is returned.
+Any other journal must always specify this.
 
 The C<%authors> field is split at C<\and> (ignoring whitespace before
 and after), and output as the C<contributors> element, using
@@ -154,7 +163,7 @@ as BibTeX:
    
 The forms can be freely intermixed within a single C<%authors> line,
 separated with C<\and> (including the backslash). Commas as name
-separators are not supported (unlike BibTeX).
+separators are not supported, unlike BibTeX.
 
 In short, you may almost always use the first form; you shouldn't if
 either there's a Jr part, or the Last part has multiple tokens but
@@ -195,7 +204,7 @@ no C<citation_list> is output for that article.
 The C<.bbl> processing is rudimentary: only so-called
 C<unstructured_citation> references are produced for Crossref, that is,
 the contents of the citation (each paragraph in the C<.bbl>) is dumped
-as a single flat string.
+as a single flat string without markup.
 
 Bibliography text is unconditionally converted from TeX to XML, via the
 method described above. It is not unusual for the conversion to be
@@ -207,15 +216,15 @@ references, each starting with C<\bibitem{I<KEY>}> (which itself must be
 at the beginning of a line, preceded only by whitespace), and the whole
 bibliography ending with C<\end{thebibliography}> (similarly at the
 beginning of a line). A bibliography not following this format will not
-produce useful results. It can be created by hand, or with BibTeX, or
-any other method.
+produce useful results. Bibliographies can be created by hand, or with
+BibTeX, or any other method.
 
 The C<key> attribute for the C<citation> element is taken as the I<KEY>
 argument to the C<\bibitem> command. The sequential number of the
 citation (1, 2, ...) is appended. The argument to C<\bibitem> can be
 empty (C<\bibitem{}>, and the sequence number will be used on its own.
-Although TeX will not handle empty C<\bibitem> keys, when creating a
-C<.bbl> purely for Crossref, it can be convenient.
+Although TeX will not handle empty C<\bibitem> keys, it can be
+convenient when creating a C<.bbl> purely for Crossref.
 
 The C<.rpi> file is also checked for the bibliography information, in
 this same format.
@@ -238,7 +247,7 @@ Boris Veytsman L<https://github.com/borisveytsman/crossrefware>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2012-2020 Boris Veytsman
+Copyright 2012-2021 Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
 terms of the GNU General Public License
@@ -272,10 +281,10 @@ extent permitted by law.
  use POSIX qw(strftime);
 
  use BibTeX::Parser::Author;
- use LaTeX::ToUnicode qw (convert);
+ use LaTeX::ToUnicode;
 
  my $USAGE = <<END;
-Usage: $0 [-c CONFIG] [-o OUTPUT] LTXFILE1 LTXFILE2 ...
+Usage: $0 [-c CONFIG] [-o OUTPUT] [--rpi-is-xml] LTXFILE...
 
 Convert .rpi and (if any are present) .bbl files corresponding to each
 LTXFILE to xml, for submitting to crossref.org. The LTXFILE is not read
@@ -285,13 +294,26 @@ LTXFILE to xml, for submitting to crossref.org. The LTXFILE is not read
 The .rpi files are plain text, with values on lines beginning with %, as
 output by (for example) the resphilosophica LaTeX package. The .bbl
 files are as output by BibTeX. Both are also commonly created by hand.
+The documentation for this script has examples.
+
+The xml is written to standard output by default; the -o (--output)
+option overrides this.
+
+If the -c (--config) option is given, the given file is read before any
+processing is done. This is used to define journal-specific defaults.
+
+The usual --help and --version options are also supported.
+
+For an example of using this script and associatd code, see the TUGboat
+processing at
+https://github.com/TeXUsersGroup/tugboat/tree/trunk/capsules/crossref.
 
 Development sources, bug tracker: https://github.com/borisveytsman/crossrefware
 Releases: https://ctan.org/pkg/crossrefware
 END
 
  my $VERSION = <<END;
-ltx2crossrefxml (crossrefware) 2.3
+ltx2crossrefxml (crossrefware) 2.51
 This is free software: you are free to change and redistribute it, under
 the terms of the GNU General Public License
 http://www.gnu.org/licenses/gpl.html (any version).
@@ -309,7 +331,7 @@ END
    "version|V"  => \($opts{V}),
    "help|?"     => \($opts{h})) || pod2usage(1);
 
- if ($opts{h}) { print $USAGE; exit 0; } 
+ if ($opts{h}) { print "$USAGE\n$VERSION"; exit 0; } 
  if ($opts{V}) { print $VERSION; exit 0; } 
 
  use utf8;
@@ -332,9 +354,9 @@ END
  our $registrant = 'REGISTRANT';
  our $fullTitle = "FULL TITLE";
  our $abbrevTitle = "ABBR. TTL.";
- our $issn = "1234-5678";
+ our $issn = "0000-0000";
  our $coden = "CODEN";
- our $timestamp=strftime("%Y%m%d%H%M%S", gmtime);
+ our $timestamp = strftime("%Y%m%d%H%M%S", gmtime);
  # use timestamp in batchid, since the value is supposed to be unique
  # for every submission to crossref by a given publisher.
  # https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#doi_batch_id
@@ -645,7 +667,7 @@ sub TitleCheck {
     
     # No tags should remain.
     if ($title =~ /</) {
-       die "$0: invalid tags remaining in: $title (originally: $orig_title)\n";
+       die "$0: invalid tags remaining in: $title (original: $orig_title)\n";
     }
 }
 
@@ -663,48 +685,15 @@ sub SanitizeText {
 sub SanitizeTextAlways {
     my $string = shift;
    
-    # call user hook function if it's defined.
-    if (defined(&{"ltx2crossrefxml_local_ltx2unicode"})) {
-        $string = &ltx2crossrefxml_local_ltx2unicode($string)
-    }
-    
+    # pass user hook subroutine if defined.
+    my @hook = (defined(&{"LaTeX_ToUnicode_convert_hook"}))
+               ? ("hook" => \&LaTeX_ToUnicode_convert_hook)
+               : ();
+
     # conversion of accented control sequences to characters, etc.
     # Let's use &#uuuu; entities instead of literal UTF-8; Crossref
     # recommends it, and it's easier for postprocessing.
-    $string = LaTeX::ToUnicode::convert($string, outputfmt => "entities");
-    
-    # some more common commands, that maybe should be in bibtexperllibs.
-    $string =~ s/\\checkcomma/,/g;
-    $string =~ s/\\cite\b\s*//g;
-    $string =~ s/\\enquote\b\s*//g;
-    $string =~ s/\\ignorespaces\b\s*//g;
-    $string =~ s/\\newblock\b\s*//g;
-    $string =~ s/\\newpage\b\s*//g;
-    $string =~ s/\\clearpage\b\s*//g;
-
-    $string =~ s/\\[be]group\b\s*//g;
-    $string =~ s/\\(begin|end)group\b\s*//g;
-
-    $string =~ s/\\emph\b\s*//g;
-
-    $string =~ s/\\path\b\s*//g;
-    $string =~ s/\\urlprefix\b\s*//g;
-    $string =~ s/\\url\b\s*//g;
-    $string =~ s/\\doi\b\s*//g;
-    
-    # \href{URL}{TEXT} -> TEXT (URL)
-    $string =~ s/\\href\b\s*{([^}]*)}\s*{([^}]*)}/$2 ($1)/g;
-    
-    $string =~ s/\\\\/ /g;
-    $string =~ s/~/ /g;
-    $string =~ s/[{}]//g;
-    
-    # Backslashes might remain. Don't remove them, as it makes for a
-    # useful way to find unhandled commands.
-
-    $string =~ s/^\s+//;  # remove leading whitespace
-    $string =~ s/\s+$//;  # remove trailing whitespace
-    $string =~ s/\s+/ /g; # collapse all remaining whitespace to one space
+    $string = LaTeX::ToUnicode::convert($string, entities => 1, @hook);
     
     return $string;
 }
