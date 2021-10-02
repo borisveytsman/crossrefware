@@ -1,8 +1,10 @@
+# Makefile for the (La)TeX crossrefware package. Public domain.
+
 SCRIPTS = \
 	ltx2crossrefxml.pl \
 	bibdoiadd.pl \
-	bibzbladd.pl \
 	bibmradd.pl \
+	bibzbladd.pl \
 	biburl2doi.pl \
 	bbl2bib.pl
 
@@ -15,17 +17,16 @@ PDF = crossrefware.pdf
 all:  ${MAN1} ${PDF}
 	chmod a+x ${SCRIPTS}
 
-
+check:
+	./ltx2crossrefxml.pl --help
+	./ltx2crossrefxml.pl --version
 
 %.1: %.pl
-	pod2man -c "CROSSREF LIBRARY" -n $* -s 1 -r "" $< > $@
-
-
+	pod2man -c "LATEX CROSSREFWARE" -n $* -s 1 -r "" $< > $@
 
 
 clean:
-	$(RM) *.aux *.toc *.log *.tex *.idx *.ilg *.ind *.out *.zip *.tgz \
-	*~
+	$(RM) *.aux *.toc *.log *.tex *.idx *.ilg *.ind *.out *.zip *.tgz *~
 
 distclean: clean
 	$(RM) *.pdf *.1 *.3
@@ -42,4 +43,7 @@ crossrefware.tex: ${SCRIPTS}
 	pod2latex -modify -full -prefile head.ltx -out $@ $+
 
 archive: all clean
-	COPYFILE_DISABLE=1 tar -C .. -czvf ../$(PACKAGE).tgz --exclude '*~' --exclude '*.tgz' --exclude '*.zip'  --exclude CVS --exclude '.git*' $(PACKAGE); mv ../$(PACKAGE).tgz .
+	COPYFILE_DISABLE=1 tar -C .. -czvf ../$(PACKAGE).tgz --exclude '*~' \
+	  --exclude '*.tgz' --exclude '*.zip'  --exclude CVS \
+	  --exclude '.git*' $(PACKAGE)
+	mv ../$(PACKAGE).tgz .

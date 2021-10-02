@@ -1,39 +1,50 @@
-\documentclass{article}
-\usepackage{makeidx}
-\usepackage[osf]{mathpazo}
+\documentclass[11pt]{article}
+\usepackage{makeidx,fullpage}
 \usepackage[hidelinks]{hyperref}
 \makeindex
 \begin{document}
 \sloppy
 \title{Crossrefware documentation\thanks{This work was commissioned by
-  The Saint Lois University and The Princeton University (Mathematics
-  Department)}}
+  Saint Louis University and Princeton University (Mathematics Department)}}
 \author{Boris Veytsman\thanks{borisv@lk.net, boris@varphi.com}}
 \maketitle
 \tableofcontents
 
 \section{Introduction}
 
-These scripts can be used to submit files to Crossref, check and add
-doi numbers, MathSciNet numbers and ZbMath numbers to papers, and to
-convert `bbl' files to `bib' files.
+These scripts can be used to create files for submission to Crossref,
+check and add doi numbers, MathSciNet numbers and ZbMath numbers to
+papers, and to convert `bbl' files to `bib' files.
 
-I am grateful to Josko Plazonic from Princeton Math Dept whose
-(unpublished) Python script was an inspiration for this suite.
+Development sources and issue tracker are on github:
+\url{https://github.com/borisveytsman/crossrefware}.
+Releases are made on CTAN:
+\url{https://ctan.org/pkg/crossrefware}
+and from there included in \TeX\ Live and other distributions.
 
-The script \path{ltx2crossrefxml} is used to extract the information
-from a \LaTeX\ file and generate an XML file suitable for submission
-to Crossref (the organization that keeps DOI numbering system).  
+The script \path{ltx2crossrefxml} extracts information from \path{.rpi}
+files and (if present) \path{.bbl} files and generates an XML file
+suitable for submission to crossref.org. (Crossref is the organization
+that handles DOI numbers for scholarly papers.) It does not actually
+upload the submission, just outputs XML.
 
-Several scripts, \path{bibdoiadd}, \path{bibmradd} and \path{bibmradd}
+This \path{.rpi} file is a plain text representation of the metadata for
+one article. It is written by the \path{resphilosophica} package
+(\url{https://ctan.org/pkg/resphilosophica}). It can also be created by
+hand.
+
+Several scripts, \path{bibdoiadd}, \path{bibmradd} and \path{bibzbladd}
 take a \path{bib} file, and add to each entry a DOI, MR or ZBL number
 correspondingly, if they can find this entry in the corresponding
 database.   
 
-Script \path{bbl2bib} tries to reconstruct a \path{bib} file from the
+The \path{bbl2bib} script tries to reconstruct a \path{bib} file from the
 corresponding \path{thebibliography} environment.  One can argue that
-this operation is akin to reconstructing a cow from the steak.  The
-way the script does it is searching for the entry in the MR database,
+this operation is akin to reconstructing the cow from a steak.  The
+way the script does it is by searching for the entry in the MR database,
 and creating the corresponding Bib\TeX\ fields.
 
-Below are manual pages for these scripts.  
+I am grateful to Josko Plazonic from Princeton Math Dept whose
+(unpublished) Python script was an inspiration for this suite.
+
+Following are manual pages for these scripts.  
