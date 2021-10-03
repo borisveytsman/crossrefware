@@ -390,6 +390,7 @@ END
 	 foreach my $issue (keys %{$papers{$year}->{$volume}}) {
 	     PrintIssueHead($year, $volume, $issue);
 	     my $paperList = $papers{$year}->{$volume}->{$issue};
+             #warn "papers for year=$year,  volume=$volume, issue=$issue\n";
 	     foreach my $paper (@{$paperList}) {
 		 PrintPaper($paper);
 	     }
@@ -456,6 +457,7 @@ sub AddPaper {
     open (RPI, $rpifile)
       or die "open($rpifile) failed: $! (did you process $file?)\n";
     my %data;
+    #warn "reading rpi file: $rpifile\n";
     while (<RPI>) {
 	chomp;
         if (/^%([^=]*)\s*=\s*(.*)\s*$/) {
@@ -478,13 +480,15 @@ sub AddPaper {
 
     # Die if the fields we use unconditionally are empty. Not all of
     # them are required by the schema, but we can wait to generalize.
-    foreach my $field (qw(title year volume issue startpage endpage doi)) {
+    foreach my $field (qw(title year volume issue startpage endpage doi
+                          paperUrl)) {
         if (! $data{$field}) {
             die ("$0: field must not be empty: $field\n  "
                  . &debug_hash_as_string("whole hash", %data));
         }
     }
 
+    #warn &debug_hash_as_string("new issue $data{volume}:$data{issue}", %data);
     push @{$papers{$data{year}}->{$data{volume}}->{$data{issue}}}, \%data;
 }
 
@@ -587,6 +591,7 @@ END
 ###############################################################
 sub PrintPaper {
     my $paper = shift;
+    #warn (&debug_hash_as_string ("doing paper", $paper));
     my $title = SanitizeText($paper->{title});
     my $url = GetURL($paper);
     my $publication_type = GetPublicationType($paper->{publicationType});
