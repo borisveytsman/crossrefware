@@ -391,7 +391,10 @@ END
 	     PrintIssueHead($year, $volume, $issue);
 	     my $paperList = $papers{$year}->{$volume}->{$issue};
              #warn "papers for year=$year,  volume=$volume, issue=$issue\n";
-	     foreach my $paper (@{$paperList}) {
+             # Nice to have the issue.xml in some stable order, so sort
+             # by starting page. Doesn't matter if it's not perfect.
+	     foreach my $paper (sort { $a->{startpage} cmp $b->{startpage} }
+				     @{$paperList}) {
 		 PrintPaper($paper);
 	     }
 	 }
