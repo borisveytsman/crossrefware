@@ -744,21 +744,25 @@ sub PrintAuthor {
              . " $orig_author\n");
     }
 
+    # for both author types, organization and person, we have to output
+    # the sequence number and the contributor role, which we assume to
+    # be author.
+    my $author_elts = qq!sequence="$seq" contributor_role="author"!;
     # for organizations, nothing to do but output it.
     if ($organization) {
         my $line = SanitizeText($author);
         print OUT <<END;
-        <organization>$line</organization>
+        <organization $author_elts>$line</organization>
 END
         return;
     }
     
     # what's left is the common case of a person, not an organization.
     print OUT <<END;
-        <person_name sequence="$seq" contributor_role="author">
+        <person_name $author_elts>
 END
 
-
+    # must split the person's name.
     my $person=new BibTeX::Parser::Author ($author);
 
     if ($person->first) {
