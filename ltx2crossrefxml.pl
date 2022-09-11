@@ -88,7 +88,6 @@ upload. The variables which are used are these:
     $abbrevTitle = "ABBR. TTL."; # optional
     $coden = "CODEN";            # optional
 
-
 For a given run, all C<.rpi> data read is assumed to belong to the
 journal that is specified in the configuration file. More precisely, the
 configuration data is written as a C<journal_metadata> element, with
@@ -247,10 +246,10 @@ Boris Veytsman L<https://github.com/borisveytsman/crossrefware>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2021  Boris Veytsman
+Copyright (C) 2012-2022  Boris Veytsman
 
 This is free software.  You may redistribute copies of it under the
-terms of the GNU General Public License
+terms of the GNU General Public License (any version)
 L<https://www.gnu.org/licenses/gpl.html>.  There is NO WARRANTY, to the
 extent permitted by law.
 
@@ -313,7 +312,7 @@ Releases: https://ctan.org/pkg/crossrefware
 END
 
  my $VERSION = <<END;
-ltx2crossrefxml (crossrefware) 2.51
+ltx2crossrefxml (crossrefware) 2.52
 This is free software: you are free to change and redistribute it, under
 the terms of the GNU General Public License
 http://www.gnu.org/licenses/gpl.html (any version).
@@ -565,10 +564,10 @@ sub AddBibliography {
     
     # We look in the .rpi files too, which will generally have none.
     if (@result == 0 && $bibfile =~ /\.bbl$/) {
-        warn "$0: no \\bibitems found in: $bibfile\n";
+        warn "$0: *** no \\bibitems found in: $bibfile\n";
     } elsif ($insidebibliography) {
-        warn "$0: no \\end{thebibliography} found in: $bibfile\n";
-        warn "$0:   so the last bib entry is missing.\n";
+        warn "$0: *** no \\end{thebibliography} found in: $bibfile\n";
+        warn "$0:       so the last bib entry is missing!\n";
     }
     return @result;
 }
@@ -764,6 +763,7 @@ END
 
     # must split the person's name.
     my $person=new BibTeX::Parser::Author ($author);
+    #warn (debug_list_as_string ($author, $person));
 
     if ($person->first) {
         my $line = $person->first;
@@ -893,5 +893,18 @@ sub debug_hash_as_string {
   $str .= join (",", @items);
   $str .= "}";
 
+  return "$str\n";
+}
+
+##############################################################
+#  debug_list_as_string($LABEL, LIST)
+#
+# Same but for lists.
+##############################################################
+sub debug_list_as_string {
+  my ($label) = shift;
+  my (@list) = (ref $_[0] && $_[0] =~ /.*ARRAY.*/) ? @{$_[0]} : @_;
+
+  my $str = "$label [" . join (",", @list) . "]";
   return "$str\n";
 }
