@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			  version 2021-10-02
+			  version 2022-10-10
 
 Scripts useful for working with Crossref, MathSciNet and Zentralblatt MATH.
 
@@ -30,7 +30,16 @@ Princeton University (Mathematics Department). Thank you!
 
 Changes:
 
-2021-10-02    - changed TEXSELFAUTOPARENT to TEXMFROOT
+2022-09-11    - add "***" prefix to bib warnings.
+
+2022-07-28    - find dev checkout of bibtexperllibs.
+
+2022-05-25    - consistently output both sequence number and contributor role.
+
+2022-11-01    - sort xml output by starting page, to be more or less stable.
+
+2021-10-02    - version 2.51 released.
+              - changed TEXSELFAUTOPARENT to TEXMFROOT 
 
 2021-01-18    - all conversions moved from ltx2crossrefxml to LaTeX::ToUnicode.
 	      - config file can provide a hook for processing.
