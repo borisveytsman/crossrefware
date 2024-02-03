@@ -354,7 +354,7 @@ END
      binmode(OUT, ":utf8")
  }
 
-
+ our $ERROR_COUNT = 0;
  our $depositorName = 'DEPOSITOR_NAME';
  our $depositorEmail = 'DEPOSITOR_EMAIL';
  our $registrant = 'REGISTRANT';
@@ -367,7 +367,6 @@ END
  # for every submission to crossref by a given publisher.
  # https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#doi_batch_id
  our $batchId="ltx2crossref-$timestamp-$$";
-
 
  if ($opts{c}) {
      if (-r $opts{c}) {
@@ -408,7 +407,7 @@ END
  }
 
  PrintTail();
- exit(0);
+ exit($ERROR_COUNT);
 
 
 #####################################################
@@ -572,10 +571,11 @@ sub AddBibliography {
     
     # We look in the .rpi files too, which will generally have none.
     if (@result == 0 && $bibfile =~ /\.bbl$/) {
-        warn "$0: *** no \\bibitems found in: $bibfile\n";
+        warn "$0: *** no \\bibitems found in: $bibfile; check if ok\n";
     } elsif ($insidebibliography) {
         warn "$0: *** no \\end{thebibliography} found in: $bibfile\n";
         warn "$0:       so the last bib entry is missing!\n";
+        $ERROR_COUNT++;
     }
     return @result;
 }

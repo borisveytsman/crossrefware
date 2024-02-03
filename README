@@ -30,6 +30,8 @@ Princeton University (Mathematics Department). Thank you!
 
 Changes:
 
+2024-01-31    - exit with bad status if no \end{thebibliography}.
+
 2022-09-11    - add "***" prefix to bib warnings.
 
 2022-07-28    - find dev checkout of bibtexperllibs.
