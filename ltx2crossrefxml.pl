@@ -43,8 +43,10 @@ ignored, and I<latex_file> itself is not read (and need not even exist).
 Each C<.rpi> file specifies the metadata for a single article to be
 uploaded to Crossref (a C<journal_article> element in their schema); an
 example is below. These files are output by the C<resphilosophica>
-package (L<https://ctan.org/pkg/resphilosophica>), but (as always) can
-also be created by hand or by whatever other method you implement.
+package (L<https://ctan.org/pkg/resphilosophica>) and the TUGboat
+publication procedure (L<https://tug.org/TUGboat/repository.html>), but
+(as always) can also be created by hand or by whatever other method you
+implement.
 
 Any C<.bbl> files present are used for the citation information in the
 output XML. See the L<CITATIONS> section below.
@@ -63,9 +65,12 @@ This script just writes an XML file. It's up to you to actually do the
 uploading to Crossref; for example, you can use their Java tool 
 C<crossref-upload-tool.jar>
 (L<https://www.crossref.org/education/member-setup/direct-deposit-xml/https-post>).
-For the definition of their schema, see
-L<https://data.crossref.org/reports/help/schema_doc/4.4.2/index.html>
-(this is the schema version currently followed by this script).
+
+For the definition of the Crossref schema currently output by this
+script, see
+L<https://data.crossref.org/reports/help/schema_doc/5.3.1/index.html>
+with additional links and information at
+L<https://www.crossref.org/documentation/schema-library/metadata-deposit-schema-5-3-1/>.
 
 =head1 CONFIGURATION FILE FORMAT
 
@@ -230,12 +235,17 @@ this same format.
 
 Feature request: if anyone is interested in figuring out how to generate
 structured citations
-(L<https://data.crossref.org/reports/help/schema_doc/5.3.1/schema_5_3_1.html#citation>)
-instead of these flat text dumps, that would be great. Except the schema
-seems to support much less than described at
-L<https://www.crossref.org/documentation/principles-practices/best-practices/bibliographic/>?
-Anyway, the most viable approach is probably to change tugboat.bst to
-output no-op TeX commands like \tubibauthor, \tubibtitle, etc. (a la
+(L<https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#citation>),
+that would be great. The schema does not support many useful fields, so
+we also want to keep the unstructured text output.
+
+Norman Gray's beastie program (L<https://heptapod.host/nxg/beastie>)
+supports this, via C<beastie extract-bib.scm -O crossref $(doc).aux>,
+as invoked in the TUGboat C<Common.mak> file. Work in progress.
+
+By the way, if for some reason we have to switch away from using
+beastie, the most viable approach is probably to change C<tugboat.bst>
+to output no-op TeX commands like \tubibauthor, \tubibtitle, etc. (a la
 biblatex), and use those commands to discern the various crossref field
 values. We can't start from the .bib because then we'd have to
 reimplement Bib(La)TeX.
@@ -365,7 +375,7 @@ END
  our $timestamp = strftime("%Y%m%d%H%M%S", gmtime);
  # use timestamp in batchid, since the value is supposed to be unique
  # for every submission to crossref by a given publisher.
- # https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#doi_batch_id
+ # https://data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#doi_batch_id
  our $batchId="ltx2crossref-$timestamp-$$";
 
  if ($opts{c}) {
@@ -425,9 +435,9 @@ sub PrintHead {
     # as of schema version 4.3.4, crossref renamed the <name> element
     # inside <depositor> to <depositor_name>. Sigh. Something to take
     # into account with older schemas.
-    # https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/schema-versions/
+    # https://www.crossref.org/documentation/schema-library/schema-versions/
     print OUT <<END;
-<doi_batch xmlns="http://www.crossref.org/schema/4.4.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.4.2" xsi:schemaLocation="http://www.crossref.org/schema/4.4.2 http://www.crossref.org/schema/deposit/crossref4.4.2.xsd">
+<doi_batch xmlns="http://www.crossref.org/schema/5.3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="5.3.1" xsi:schemaLocation="http://www.crossref.org/schema/5.3.1 http://www.crossref.org/schema/deposit/crossref5.3.1.xsd">
   <head>
     <doi_batch_id>$batchId</doi_batch_id>
     <timestamp>$timestamp</timestamp>
@@ -658,12 +668,11 @@ END
 ###############################################################
 # Crossref <title> strings can contain a few so-called "face" HTML
 # commands. Complain if they have anything anything else.
-# schema doc: https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#title
-#   face doc: https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/face-markup/
-# mathml doc: https://www.crossref.org/education/content-registration/crossrefs-metadata-deposit-schema/including-mathml-in-deposits/
+# schema doc: https://data.crossref.org/reports/help/schema_doc/5.3.1/crossref5_3_1_xsd.html#title
+#   face doc: https://www.crossref.org/documentation/schema-library/markup-guide-metadata-segments/face-markup/
 # 
 # We don't technically validate the string, e.g., mismatched tags will
-# go unnoticed here. The real validator at Crossref will catch whatever.
+# go unnoticed here. The real validator at Crossref should catch everything.
 ###############################################################
 sub TitleCheck {
     my $title = shift;
@@ -829,7 +838,7 @@ END
 
 ##############################################################
 #  Return publication_type attribute for <journal_article>, given $PUBTYPE.
-#  https://data.crossref.org/reports/help/schema_doc/4.4.2/schema_4_4_2.html#publication_type.atts
+#  https://data.crossref.org/reports/help/schema_doc/5.3.1/crossref5_3_1_xsd.html#publication_type.atts_publication_type
 #  
 #  If not specified in input, return " publication_type=full_text" since
 #  it was hardwired that way before. If set to "omit", return empty
