@@ -30,13 +30,15 @@ upload the submission, just outputs XML.
 
 This \path{.rpi} file is a plain text representation of the metadata for
 one article. It is written by the \path{resphilosophica} package
-(\url{https://ctan.org/pkg/resphilosophica}). It can also be created by
-hand.
+(\url{https://ctan.org/pkg/resphilosophica}) and the TUGboat publication
+procedure (\url{https://tug.org/TUGboat/repository.html}). It can also
+be created by hand.
 
 Several scripts, \path{bibdoiadd}, \path{bibmradd} and \path{bibzbladd}
 take a \path{bib} file, and add to each entry a DOI, MR or ZBL number
 correspondingly, if they can find this entry in the corresponding
-database.   
+database.  The output of these scripts reformats the BibTeX entries
+where the respective fields were not already present.
 
 The \path{bbl2bib} script tries to reconstruct a \path{bib} file from the
 corresponding \path{thebibliography} environment.  One can argue that
@@ -44,7 +46,10 @@ this operation is akin to reconstructing the cow from a steak.  The
 way the script does it is by searching for the entry in the MR database,
 and creating the corresponding Bib\TeX\ fields.
 
-I am grateful to Josko Plazonic from Princeton Math Dept whose
-(unpublished) Python script was an inspiration for this suite.
+I am grateful to Josko Plazonic from the Princeton mathematics
+department whose (unpublished) Python script was an inspiration for this
+suite.
 
-Following are manual pages for these scripts.  
+Following are manual pages for these scripts.  See also the
+\texttt{BibTeX::Parser} package
+(\url{https://ctan.org/pkg/bibtexperllibs}).

@@ -25,6 +25,11 @@ check:
 	pod2man -c "LATEX CROSSREFWARE" -n $* -s 1 -r "" $< > $@
 
 
+lastrel = /home/ftp/tex-archive/support/crossrefware
+reldiff:
+	diff -u0r $(lastrel) .
+gitdiff:
+	git diff
 clean:
 	$(RM) *.aux *.toc *.log *.tex *.idx *.ilg *.ind *.out *.zip *.tgz *~
 
