@@ -663,7 +663,7 @@ sub AddCrossrefBib {
         
         # qqq undone - must save by key, then write by key into the xml.
         # need to be able to clean the text, beastie removes braces.
-        warn "crb $bibno: $crb\n";
+        #warn "crb $bibno: $crb\n";
     }
     
     if ($bibno == 0) {
@@ -886,7 +886,7 @@ sub PrintCitationList {
     foreach my $citation_hash (@$bibliography) {
         foreach my $citekey (keys (%{$citation_hash})) {  # only one key
             my $citation_text = $citation_hash->{$citekey};
-            $citation_text = SanitizeTextAlways($citation_text);
+            $citation_text = SanitizeTextEntities($citation_text);
 
             #warn "  printing citation $citekey: $citation_text\n";
             my $structured_citation = "";
