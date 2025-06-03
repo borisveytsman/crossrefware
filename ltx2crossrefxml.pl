@@ -304,7 +304,7 @@ extent permitted by law.
  use BibTeX::Parser::Author;
  use BibTeX::Parser;
  use LaTeX::ToUnicode;
- use IO::file;
+ use IO::File;
 
  my $USAGE = <<END;
 Usage: $0 [-c CONFIG] [-o OUTPUT] [--rpi-is-xml] LTXFILE...
