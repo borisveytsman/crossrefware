@@ -38,9 +38,9 @@ distclean: clean
 
 
 %.pdf: %.tex
-	pdflatex $*
+	texfot pdflatex $*
 	makeindex $*
-	pdflatex $*
+	texfot pdflatex $*
 
 crossrefware.tex:  head.ltx
 
