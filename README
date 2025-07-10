@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			  version 2025-05-26
+			  version 2025-07-09
 
 Scripts useful for working with Crossref, MathSciNet and Zentralblatt MATH.
 
@@ -17,8 +17,8 @@ These scripts rely on the bibtexperllibs libraries (replace
 /crossrefware with /bibtexperllibs in the above urls).
 
 For an example of using ltx2crossrefxml and associated code, see the
-TUGboat processing at
-https://github.com/TeXUsersGroup/tugboat/tree/trunk/capsules/crossref.
+TUGboat processing:
+  https://github.com/TeXUsersGroup/tugboat/tree/trunk/capsules/crossref
 
 Installation:
 1.  Move *.pl files to the binaries directory in your system.
@@ -29,6 +29,9 @@ This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
 Changes:
+
+2025-07-09    - Use entities in structured citation output;
+                avoid uploading unaccepted structured citations
 
 2025-05-26    - Added processing of .bib files to get structured citations
 
