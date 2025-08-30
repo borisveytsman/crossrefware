@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			  version 2025-07-09
+			  version 2025-08-30
 
 Scripts useful for working with Crossref, MathSciNet and Zentralblatt MATH.
 
@@ -29,6 +29,10 @@ This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
 Changes:
+
+2025-08-30    - Redesigned bibzbladd due to changes in zbmath output.
+                Now the user can select the cutoff probability to
+		accept the search results.
 
 2025-07-09    - Use entities in structured citation output;
                 avoid uploading unaccepted structured citations
