@@ -862,7 +862,24 @@ sub ConvertBibentryToCr {
 
     $result{'citation'} .= ConvertBibFieldToCfield($entry, 'year', 'cYear');
 
-    $result{'citation'} .= ConvertBibFieldToCfield($entry, 'doi');
+    my $doi = $entry->{"doi"};
+    if ($doi) {
+      # Crossref accepts only a bare doi, so remove any leading
+      # https://doi.org/, etc. Complain now if it doesn't match
+      # the regexp the Crossref schema specifies.
+      $doi =~ s,^(https?://)?(dx\.)?doi\.org/,,; 
+      if ($doi !~ m!10\.[0-9]{4,9}/.{1,200}!) { # per crossref schema
+        warn "$0: invalid doi for crossref: $entry->{doi} (-> $doi)\n";
+        warn "$0:   (in title: $entry->{title})\n";
+      }
+      if ($doi ne $entry->{"doi"}) {
+        # If we made any changes to the value, update field value so we
+        # can call the usual routine.
+        $entry->{"doi_orig"} = $entry->{"doi"};
+        $entry->{"doi"} = $doi;
+      }
+      $result{'citation'} .= ConvertBibFieldToCfield($entry, 'doi');
+    }
 
     my $isbn = $entry->{"isbn"};
     if ($isbn) {

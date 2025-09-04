@@ -29,6 +29,8 @@ This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
 Changes:
+              - Silently remove a leading http(s)://(dx.)doi.org
+                from doi values, since Crossref does not accept them.
 
 2025-08-30    - Redesigned bibzbladd due to changes in zbmath output.
                 Now the user can select the cutoff probability to
