@@ -36,6 +36,8 @@ Changes:
                 Now the user can select the cutoff probability to
 		accept the search results.
 
+2025-07-28    - Switched to crossref schema 5.4.0
+
 2025-07-09    - Use entities in structured citation output;
                 avoid uploading unaccepted structured citations
 
