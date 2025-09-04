@@ -540,7 +540,12 @@ sub PrintHead {
     # Crossref schema info:
     # https://www.crossref.org/documentation/schema-library/schema-versions/
     print OUT <<END;
-<doi_batch xmlns="http://www.crossref.org/schema/5.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="5.4.0" xsi:schemaLocation="http://www.crossref.org/schema/5.4.0 https://www.crossref.org/schemas/crossref5.4.0.xsd">
+<doi_batch
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="5.4.0"
+    xmlns="http://www.crossref.org/schema/5.4.0"
+    xsi:schemaLocation="http://www.crossref.org/schema/5.4.0
+                       https://www.crossref.org/schemas/crossref5.4.0.xsd">
   <head>
     <doi_batch_id>$batchId</doi_batch_id>
     <timestamp>$timestamp</timestamp>
@@ -884,7 +889,7 @@ sub ConvertBibentryToCr {
     my $isbn = $entry->{"isbn"};
     if ($isbn) {
         # requirements at
-  # data.crossref.org/reports/help/schema_doc/5.3.1/common5_3_1_xsd.html#isbn_t
+  # data.crossref.org/reports/help/schema_doc/5.4.0/schema_5_4_0.html#http___www.crossref.org_schema_5.4.0_isbn
         my $len = length($isbn);
         if ($len == 9 && $isbn =~ /^\d+$/) {
             # 9-digit standard book number from the 1960s; prepend 0 to
@@ -1015,7 +1020,7 @@ END
 ###############################################################
 # Crossref <title> strings can contain a few so-called "face" HTML
 # commands. Complain if they have anything anything else.
-# schema doc: https://data.crossref.org/reports/help/schema_doc/5.3.1/crossref5_3_1_xsd.html#title
+# schema doc: https://data.crossref.org/reports/help/schema_doc/5.4.0/schema_5_4_0.html#title
 #   face doc: https://www.crossref.org/documentation/schema-library/markup-guide-metadata-segments/face-markup/
 # 
 # We don't technically validate the string, e.g., mismatched tags will
@@ -1189,7 +1194,7 @@ END
 
 ##############################################################
 #  Return publication_type attribute for <journal_article>, given $PUBTYPE.
-#  https://data.crossref.org/reports/help/schema_doc/5.3.1/crossref5_3_1_xsd.html#publication_type.atts_publication_type
+#  https://data.crossref.org/reports/help/schema_doc/5.4.0/NO_NAMESPACE.html#publication_type.atts_publication_type
 #  
 #  If not specified in input, return " publication_type=full_text" since
 #  it was hardwired that way before. If set to "omit", return empty
