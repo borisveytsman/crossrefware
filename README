@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			  version 2025-08-30
+			  version 2025-09-20
 
 Scripts useful for working with Crossref, MathSciNet and Zentralblatt MATH.
 
@@ -29,8 +29,9 @@ This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
 Changes:
-              - Silently remove a leading http(s)://(dx.)doi.org
+2025-09-20    - Silently remove a leading http(s)://(dx.)doi.org
                 from doi values, since Crossref does not accept them.
+              - bbl2bib now uses https protocol
 
 2025-08-30    - Redesigned bibzbladd due to changes in zbmath output.
                 Now the user can select the cutoff probability to
