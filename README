@@ -29,6 +29,9 @@ This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
 Changes:
+
+2025-09-25    - Updated address of mathscinet mirror
+
 2025-09-20    - Silently remove a leading http(s)://(dx.)doi.org
                 from doi values, since Crossref does not accept them.
               - bbl2bib now uses https protocol
