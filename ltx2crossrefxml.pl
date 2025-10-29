@@ -1273,6 +1273,11 @@ sub SanitizeTextNoEntities {
 
     $string = LaTeX::ToUnicode::convert($string, @hook, @_);
     
+    # Remove $...$ math-shift pairs; TeX math is sufficiently plain-text
+    # not to do anything more. If we do do something more eventually,
+    # it should be done LaTeX::ToUnicode, not here.
+    $string =~ s/\$(.*?)\$/$1/g;
+
     return $string;
 }
 

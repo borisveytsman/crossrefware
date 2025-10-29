@@ -30,6 +30,8 @@ Princeton University (Mathematics Department). Thank you!
 
 Changes:
 
+              - Remove math-shift $...$ pairs.
+
 2025-09-25    - Updated address of mathscinet mirror
 
 2025-09-20    - Silently remove a leading http(s)://(dx.)doi.org
