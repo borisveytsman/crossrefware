@@ -162,7 +162,7 @@ my $parser=new BibTeX::Parser($input);
 # Creating the HTTP parameters
 my $mirror =
     "https://zbmath.org/citationmatching/bibtex/match";
-my $userAgent = LWP::UserAgent->new (agent => 'Mozilla/5.0');
+my $userAgent = LWP::UserAgent->new (agent => 'curl');
 
 while (my $entry = $parser->next ) {
     if (!$entry->parse_ok()) {
