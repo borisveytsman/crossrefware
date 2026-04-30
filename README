@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			  version 2025-09-20
+			  version 2026-04-30
 
 Scripts useful for working with Crossref, MathSciNet and Zentralblatt MATH.
 
@@ -29,8 +29,9 @@ This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
 Changes:
-
               - Remove math-shift $...$ pairs.
+	      - Repair incorrect TeX en-dashes in issn value.
+	      - Warn about missed "orcid=" key in lists-authinfo.txt
 
 2025-09-25    - Updated address of mathscinet mirror
 
