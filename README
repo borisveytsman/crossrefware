@@ -29,6 +29,8 @@ This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
 Changes:
+2026-06-22    - Corrected a bug in bibmradd
+
 2026-06-20    - Complete refactoring of bibmradd and bibzbladd using
 	        published API interfaces
 
