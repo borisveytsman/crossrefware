@@ -246,9 +246,9 @@ produce useful results. The C<.bbl> file can be created by hand, or with
 BibTeX, or any other method, as long as it has this format.
 
 The C<key> attribute for the C<citation> element is taken as the I<KEY>
-argument to the C<\bibitem> command. The sequential number of the
-citation (1, 2, ...). The argument to C<\bibitem> can be
-empty (C<\bibitem{}>, and the sequence number will be used on its own.
+argument to the C<\bibitem> command, with the sequential number of the
+citation (1, 2, ...) appended. The argument to C<\bibitem> can be empty
+(C<\bibitem{}>, and the sequence number will be used on its own.
 Although TeX will not handle empty C<\bibitem> keys, it can be
 convenient when creating a C<.bbl> purely for Crossref.
 
@@ -546,7 +546,7 @@ sub PrintHead {
     version="5.4.0"
     xmlns="http://www.crossref.org/schema/5.4.0"
     xsi:schemaLocation="http://www.crossref.org/schema/5.4.0
-                       https://www.crossref.org/schemas/crossref5.4.0.xsd">
+                       https://data.crossref.org/schemas/crossref5.4.0.xsd">
   <head>
     <doi_batch_id>$batchId</doi_batch_id>
     <timestamp>$timestamp</timestamp>

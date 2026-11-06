@@ -1,5 +1,5 @@
 			 Crossrefware Bundle
-			  version 2026-06-22
+			  version 2026-06-22+dev
 
 Scripts useful for working with Crossref, MathSciNet and Zentralblatt MATH.
 
@@ -29,6 +29,9 @@ This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
 Changes:
+              - use data.crossref.org in xsi:schemaLocation
+                for https://www.crossref.org/02publishers/parser.html.
+
 2026-06-22    - Corrected a bug in bibmradd
 
 2026-06-20    - Complete refactoring of bibmradd and bibzbladd using
