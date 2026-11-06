@@ -77,7 +77,7 @@ C<crossref-upload-tool.jar>
 
 For the definition of the Crossref schema currently output by this
 script, see
-L<https://data.crossref.org/reports/help/schema_doc/5.4.0/index.html>
+L<https://data.crossref.org/reports/help/schema_doc/5.5.0/index.html>
 with additional links and information at
 L<https://www.crossref.org/documentation/schema-library/metadata-deposit-schema-5-4-0/>.
 
@@ -278,7 +278,7 @@ describe below (L<CITATION ENTRY TYPES>).
 =head2 CITATION ENTRY TYPES
 
 The current Crossref schema
-L<https://data.crossref.org/reports/help/schema_doc/5.4.0/schema_5_4_0.html>
+L<https://data.crossref.org/reports/help/schema_doc/5.5.0/schema_5_4_0.html>
 defines C<type> attribute for a citation.  Unfortunately the list of
 possible types does not fully coincide with the list of BibTeX entry
 types.  Therefore the script uses the following algorithm to determine
@@ -437,7 +437,7 @@ END
  our $timestamp = strftime("%Y%m%d%H%M%S", gmtime);
  # use timestamp in batchid, since the value is supposed to be unique
  # for every submission to crossref by a given publisher.
- # https://data.crossref.org/reports/help/schema_doc/5.4.0/schema_5_4_0.html#doi_batch_id
+ # https://data.crossref.org/reports/help/schema_doc/5.5.0/schema_5_4_0.html#doi_batch_id
  our $batchId="ltx2crossref-$timestamp-$$";
 
  # Default mappings of BibTeX entries to Crossref types
@@ -543,10 +543,10 @@ sub PrintHead {
     print OUT <<END;
 <doi_batch
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    version="5.4.0"
-    xmlns="http://www.crossref.org/schema/5.4.0"
-    xsi:schemaLocation="http://www.crossref.org/schema/5.4.0
-                       https://data.crossref.org/schemas/crossref5.4.0.xsd">
+    version="5.5.0"
+    xmlns="http://www.crossref.org/schema/5.5.0"
+    xsi:schemaLocation="http://www.crossref.org/schema/5.5.0
+                        http://data.crossref.org/schemas/crossref5.5.0.xsd">
   <head>
     <doi_batch_id>$batchId</doi_batch_id>
     <timestamp>$timestamp</timestamp>
@@ -719,7 +719,7 @@ sub AddBibliography {
 # Extract bib entries corresponding to the list of keys and convert
 # them to XML structured citations accoding to Crossref
 # scheme at
-# https://data.crossref.org/reports/help/schema_doc/5.4.0/schema_5_4_0.html#citation 
+# https://data.crossref.org/reports/help/schema_doc/5.5.0/schema_5_4_0.html#citation 
 # 
 # Return a hash reference, with each element's key being the citation
 # key plus an integer, the same keys as in AddBibliography from the .bbl
@@ -836,7 +836,7 @@ sub CrEntrytype {
 ############################################################## 
 # Convert a BibTeX entry to Crossref structured citation
 # according to
-# https://data.crossref.org/reports/help/schema_doc/5.4.0/schema_5_4_0.html#citation
+# https://data.crossref.org/reports/help/schema_doc/5.5.0/schema_5_4_0.html#citation
 #
 # Return a hash with two elements: entrytype and citation
 ##############################################################
@@ -912,7 +912,7 @@ sub ConvertBibentryToCr {
     my $isbn = $entry->{"isbn"};
     if ($isbn) {
         # requirements at
-  # data.crossref.org/reports/help/schema_doc/5.4.0/schema_5_4_0.html#http___www.crossref.org_schema_5.4.0_isbn
+  # data.crossref.org/reports/help/schema_doc/5.5.0/schema_5_4_0.html#http___www.crossref.org_schema_5.5.0_isbn
         my $len = length($isbn);
         if ($len == 9 && $isbn =~ /^\d+$/) {
             # 9-digit standard book number from the 1960s; prepend 0 to
@@ -1043,7 +1043,7 @@ END
 ###############################################################
 # Crossref <title> strings can contain a few so-called "face" HTML
 # commands. Complain if they have anything anything else.
-# schema doc: https://data.crossref.org/reports/help/schema_doc/5.4.0/schema_5_4_0.html#title
+# schema doc: https://data.crossref.org/reports/help/schema_doc/5.5.0/schema_5_4_0.html#title
 #   face doc: https://www.crossref.org/documentation/schema-library/markup-guide-metadata-segments/face-markup/
 # 
 # We don't technically validate the string, e.g., mismatched tags will
@@ -1221,7 +1221,7 @@ END
 
 ##############################################################
 #  Return publication_type attribute for <journal_article>, given $PUBTYPE.
-#  https://data.crossref.org/reports/help/schema_doc/5.4.0/NO_NAMESPACE.html#publication_type.atts_publication_type
+#  https://data.crossref.org/reports/help/schema_doc/5.5.0/NO_NAMESPACE.html#publication_type.atts_publication_type
 #  
 #  If not specified in input, return " publication_type=full_text" since
 #  it was hardwired that way before. If set to "omit", return empty
