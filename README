@@ -28,8 +28,8 @@ Installation:
 This work was commissioned by The Saint Louis University and
 Princeton University (Mathematics Department). Thank you!
 
-Changes:
-              - use data.crossref.org in xsi:schemaLocation
+Changes:      - Update to crossref schema 5.5.0.
+              - Use data.crossref.org in xsi:schemaLocation
                 for https://www.crossref.org/02publishers/parser.html.
 
 2026-06-22    - Corrected a bug in bibmradd
